@@ -6,11 +6,13 @@ use App\Mapeadores\Tarefa\QuadroMapeador;
 use App\Models\Tarefa\Quadro as QuadroModelo;
 use Core\Domain\Tarefa\Entities\Quadro;
 use Core\Domain\Tarefa\Repositories\QuadroRepository;
+use Illuminate\Support\Facades\DB;
 
 class QuadroEloquentRepository implements QuadroRepository
 {
     public function __construct(private readonly QuadroMapeador $mapeador) {}
 
+    // todo: implementar o retorno para kanbam  
     public function listarPorUsuarioId(int $usuarioId): array
     {
         return QuadroModelo::query()
@@ -22,25 +24,27 @@ class QuadroEloquentRepository implements QuadroRepository
 
     public function criar(Quadro $quadro): Quadro
     {
-        return \DB::transaction(function () use ($quadro) {
+        return DB::transaction(function () use ($quadro) {
             $modelo = $this->mapeador->paraModelo($quadro);
-            $modelo->create($quadro->paraArray());
+            $modelo->save();
+
             return $this->mapeador->paraEntidade($modelo->refresh());
         });
     }
 
     public function atualizar(int $id, Quadro $quadro): Quadro
     {
-        return \DB::transaction(function () use ($id, $quadro) {
+        return DB::transaction(function () use ($id, $quadro) {
             $modelo = QuadroModelo::query()->findOrFail($id);
             $this->mapeador->paraModelo($quadro, $modelo)->update();
+
             return $this->mapeador->paraEntidade($modelo->refresh());
         });
     }
 
     public function apagar(int $id): void
     {
-        \DB::transaction(function () use ($id) {
+        DB::transaction(function () use ($id) {
             QuadroModelo::query()->findOrFail($id)->delete();
         });
     }
@@ -48,5 +52,13 @@ class QuadroEloquentRepository implements QuadroRepository
     public function pertenceAoUsuario(int $id, int $usuarioId): bool
     {
         return QuadroModelo::query()->whereKey($id)->where('usuario_id', $usuarioId)->exists();
+    }
+
+    public function convidarUmUsuario(int $id, int $usuarioId): void
+    {
+        DB::transaction(function () use ($id, $usuarioId) {
+            $quadro = QuadroModelo::query()->findOrFail($id);
+            $quadro->usuarios()->attach($usuarioId);
+        });
     }
 }

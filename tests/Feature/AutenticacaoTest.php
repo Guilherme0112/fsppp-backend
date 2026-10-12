@@ -67,7 +67,7 @@ class AutenticacaoTest extends TestCase
 
         $token = $resposta->json('token');
 
-        $this->withToken($token)->getJson('/api/v1/quadros')->assertOk()->assertExactJson([]);
+        $this->withToken($token)->getJson('/api/v1/quadros')->assertOk()->assertJsonPath('data', []);
         $this->withToken($token)->postJson('/api/v1/autenticacao/sair')->assertNoContent();
         Auth::forgetGuards();
         $this->withToken($token)->getJson('/api/v1/quadros')->assertUnauthorized();

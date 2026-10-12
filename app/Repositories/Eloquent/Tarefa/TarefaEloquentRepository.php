@@ -33,7 +33,9 @@ class TarefaEloquentRepository implements TarefaRepository
     {
         return \DB::transaction(function () use ($quadroId, $tarefa) {
             $modelo = $this->mapeador->paraModelo($tarefa);
-            $modelo->create([...$tarefa->paraArray(), 'quadro_id' => $quadroId]);
+            $modelo->quadro_id = $quadroId;
+            $modelo->save();
+
             return $this->mapeador->paraEntidade($modelo->refresh());
         });
     }
@@ -43,6 +45,7 @@ class TarefaEloquentRepository implements TarefaRepository
         return \DB::transaction(function () use ($id, $tarefa) {
             $modelo = TarefaModelo::query()->findOrFail($id);
             $this->mapeador->paraModelo($tarefa, $modelo)->update();
+
             return $this->mapeador->paraEntidade($modelo->refresh());
         });
     }

@@ -1,0 +1,949 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "FSPPP API",
+        "description": "API para o projeto FSPPP (Sistema de Gestão de Tarefas)",
+        "contact": {
+            "email": "suporte@fsppp.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000/api/v1",
+            "description": "Servidor de Desenvolvimento"
+        }
+    ],
+    "paths": {
+        "/autenticacao/entrar": {
+            "post": {
+                "tags": [
+                    "Autenticação"
+                ],
+                "summary": "Autenticar usuário",
+                "description": "Retorna o token de acesso para o usuário",
+                "operationId": "c636763bfebd791d2c5ff6056b030519",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "usuario@example.com"
+                                    },
+                                    "senha": {
+                                        "type": "string",
+                                        "example": "senha-correta"
+                                    },
+                                    "nome_dispositivo": {
+                                        "type": "string",
+                                        "example": "meu-computador"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Autenticado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "usuario": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "nome": {
+                                                    "type": "string"
+                                                },
+                                                "email": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "token": {
+                                            "type": "string"
+                                        },
+                                        "tipo_token": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Credenciais inválidas"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                }
+            }
+        },
+        "/autenticacao/sair": {
+            "post": {
+                "tags": [
+                    "Autenticação"
+                ],
+                "summary": "Encerrar sessão",
+                "description": "Invalida o token de acesso atual",
+                "operationId": "1174754f649925633dc97de83eba758c",
+                "responses": {
+                    "204": {
+                        "description": "Sessão encerrada com sucesso"
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/quadros": {
+            "get": {
+                "tags": [
+                    "Quadros"
+                ],
+                "summary": "Listar quadros do usuário",
+                "operationId": "6f64217f419d2886f76c70f3b9fbedef",
+                "responses": {
+                    "200": {
+                        "description": "Lista de quadros",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer"
+                                            },
+                                            "nome": {
+                                                "type": "string"
+                                            },
+                                            "descricao": {
+                                                "type": "string",
+                                                "nullable": true
+                                            },
+                                            "usuario_id": {
+                                                "type": "integer"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Quadros"
+                ],
+                "summary": "Criar novo quadro",
+                "operationId": "eeff6b060389f5b57b1c0bbc64f6ed9a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "Meu Quadro"
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "example": "Descrição do quadro",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Quadro criado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "nome": {
+                                            "type": "string"
+                                        },
+                                        "descricao": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "usuario_id": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/quadros/{id}": {
+            "put": {
+                "tags": [
+                    "Quadros"
+                ],
+                "summary": "Editar quadro existente",
+                "operationId": "6c254c7004d1d8a4c09c0e1da3977219",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "Nome Atualizado"
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "example": "Descrição atualizada",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Quadro atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "nome": {
+                                            "type": "string"
+                                        },
+                                        "descricao": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "usuario_id": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Quadro não encontrado"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Quadros"
+                ],
+                "summary": "Apagar quadro",
+                "operationId": "b1d4fdeec779b129f47966f1dd287fb6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Quadro apagado com sucesso"
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Quadro não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/status-quadro/{quadroId}": {
+            "get": {
+                "tags": [
+                    "Status do Quadro"
+                ],
+                "summary": "Listar status de um quadro",
+                "operationId": "5256c79d130fac915c568c1661908651",
+                "parameters": [
+                    {
+                        "name": "quadroId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de status do quadro",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer"
+                                            },
+                                            "nome": {
+                                                "type": "string"
+                                            },
+                                            "descricao": {
+                                                "type": "string",
+                                                "nullable": true
+                                            },
+                                            "quadro_id": {
+                                                "type": "integer"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Quadro não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Status do Quadro"
+                ],
+                "summary": "Criar novo status para o quadro",
+                "operationId": "e81f8acf119e7686826b1cb857a31963",
+                "parameters": [
+                    {
+                        "name": "quadroId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "A Fazer"
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "example": "Tarefas pendentes",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Status criado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "nome": {
+                                            "type": "string"
+                                        },
+                                        "descricao": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "quadro_id": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Quadro não encontrado"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/status-quadro/{quadroId}/{id}": {
+            "put": {
+                "tags": [
+                    "Status do Quadro"
+                ],
+                "summary": "Editar status de um quadro",
+                "operationId": "c72a514d6097e683be632b830a578538",
+                "parameters": [
+                    {
+                        "name": "quadroId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "Em Andamento"
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "example": "Tarefas sendo executadas",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "nome": {
+                                            "type": "string"
+                                        },
+                                        "descricao": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "quadro_id": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Status ou Quadro não encontrado"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Status do Quadro"
+                ],
+                "summary": "Apagar status de um quadro",
+                "operationId": "a03bc50d762f1d39135e0530918f58ff",
+                "parameters": [
+                    {
+                        "name": "quadroId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Status apagado com sucesso"
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Status ou Quadro não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/tarefas": {
+            "get": {
+                "tags": [
+                    "Tarefas"
+                ],
+                "summary": "Listar tarefas do usuário",
+                "operationId": "9c9baa201df49c12abfafbdf5fb49636",
+                "responses": {
+                    "200": {
+                        "description": "Lista de tarefas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer"
+                                            },
+                                            "nome": {
+                                                "type": "string"
+                                            },
+                                            "descricao": {
+                                                "type": "string",
+                                                "nullable": true
+                                            },
+                                            "status_id": {
+                                                "type": "integer"
+                                            },
+                                            "quadro_id": {
+                                                "type": "integer"
+                                            },
+                                            "data_inicio": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "nullable": true
+                                            },
+                                            "data_fim": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "nullable": true
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Tarefas"
+                ],
+                "summary": "Criar nova tarefa",
+                "operationId": "e76f1d4b76a5fa2f5d2bb04cab196049",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "Minha Tarefa"
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "example": "Detalhes da tarefa",
+                                        "nullable": true
+                                    },
+                                    "status_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "quadro_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "data_inicio": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-10-11",
+                                        "nullable": true
+                                    },
+                                    "data_fim": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-10-12",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tarefa criada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "nome": {
+                                            "type": "string"
+                                        },
+                                        "descricao": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "status_id": {
+                                            "type": "integer"
+                                        },
+                                        "quadro_id": {
+                                            "type": "integer"
+                                        },
+                                        "data_inicio": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "nullable": true
+                                        },
+                                        "data_fim": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/tarefas/{id}": {
+            "put": {
+                "tags": [
+                    "Tarefas"
+                ],
+                "summary": "Atualizar tarefa existente",
+                "operationId": "e698991688852e661b84abeccfa30aa5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "Tarefa Atualizada"
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "example": "Novos detalhes",
+                                        "nullable": true
+                                    },
+                                    "status_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "quadro_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "data_inicio": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-10-11",
+                                        "nullable": true
+                                    },
+                                    "data_fim": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-10-13",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tarefa atualizada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "nome": {
+                                            "type": "string"
+                                        },
+                                        "descricao": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "status_id": {
+                                            "type": "integer"
+                                        },
+                                        "quadro_id": {
+                                            "type": "integer"
+                                        },
+                                        "data_inicio": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "nullable": true
+                                        },
+                                        "data_fim": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Tarefa não encontrada"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Tarefas"
+                ],
+                "summary": "Apagar tarefa",
+                "operationId": "950d58fe9a3a3bb132bd6dc3d35a236c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Tarefa apagada com sucesso"
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Tarefa não encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "name": "Authorization",
+                "in": "header",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Autenticação",
+            "description": "Autenticação"
+        },
+        {
+            "name": "Quadros",
+            "description": "Quadros"
+        },
+        {
+            "name": "Status do Quadro",
+            "description": "Status do Quadro"
+        },
+        {
+            "name": "Tarefas",
+            "description": "Tarefas"
+        }
+    ]
+}

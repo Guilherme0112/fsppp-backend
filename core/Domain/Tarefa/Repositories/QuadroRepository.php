@@ -15,4 +15,6 @@ interface QuadroRepository
     public function apagar(int $id): void;
 
     public function pertenceAoUsuario(int $id, int $usuarioId): bool;
+
+    public function convidarUmUsuario(int $quadroId, int $usuarioId): void;
 }
