@@ -19,8 +19,8 @@ class StatusQuadroController extends Controller
     #[OA\Get(
         path: '/status-quadro/{quadroId}',
         summary: 'Listar status de um quadro',
-        tags: ['Status do Quadro'],
         security: [['bearerAuth' => []]],
+        tags: ['Status do Quadro'],
         parameters: [
             new OA\Parameter(name: 'quadroId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
@@ -55,11 +55,7 @@ class StatusQuadroController extends Controller
     #[OA\Post(
         path: '/status-quadro/{quadroId}',
         summary: 'Criar novo status para o quadro',
-        tags: ['Status do Quadro'],
         security: [['bearerAuth' => []]],
-        parameters: [
-            new OA\Parameter(name: 'quadroId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -69,6 +65,10 @@ class StatusQuadroController extends Controller
                 ]
             )
         ),
+        tags: ['Status do Quadro'],
+        parameters: [
+            new OA\Parameter(name: 'quadroId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
         responses: [
             new OA\Response(
                 response: 201,
@@ -100,12 +100,7 @@ class StatusQuadroController extends Controller
     #[OA\Put(
         path: '/status-quadro/{quadroId}/{id}',
         summary: 'Editar status de um quadro',
-        tags: ['Status do Quadro'],
         security: [['bearerAuth' => []]],
-        parameters: [
-            new OA\Parameter(name: 'quadroId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
-            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -115,6 +110,11 @@ class StatusQuadroController extends Controller
                 ]
             )
         ),
+        tags: ['Status do Quadro'],
+        parameters: [
+            new OA\Parameter(name: 'quadroId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
         responses: [
             new OA\Response(
                 response: 200,
@@ -152,8 +152,8 @@ class StatusQuadroController extends Controller
     #[OA\Delete(
         path: '/status-quadro/{quadroId}/{id}',
         summary: 'Apagar status de um quadro',
-        tags: ['Status do Quadro'],
         security: [['bearerAuth' => []]],
+        tags: ['Status do Quadro'],
         parameters: [
             new OA\Parameter(name: 'quadroId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),

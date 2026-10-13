@@ -10,6 +10,7 @@ use Core\Application\Tarefa\DTOs\CriarStatusQuadroDTO;
 use Core\Application\Tarefa\DTOs\CriarTarefaDTO;
 use Core\Application\Tarefa\DTOs\ListarQuadrosDTO;
 use Core\Application\Tarefa\DTOs\ListarTarefasDTO;
+use Core\Application\Tarefa\DTOs\ListarTarefasPorStatusDTO;
 use Core\Application\Tarefa\UseCases\ApagarQuadroUseCase;
 use Core\Application\Tarefa\UseCases\ApagarStatusQuadroUseCase;
 use Core\Application\Tarefa\UseCases\ApagarTarefaUseCase;
@@ -21,6 +22,7 @@ use Core\Application\Tarefa\UseCases\CriarStatusQuadroUseCase;
 use Core\Application\Tarefa\UseCases\CriarTarefaUseCase;
 use Core\Application\Tarefa\UseCases\ListarQuadrosPorUsuarioIdUseCase;
 use Core\Application\Tarefa\UseCases\ListarStatusQuadroUseCase;
+use Core\Application\Tarefa\UseCases\ListarTarefasPorStatusUseCase;
 use Core\Application\Tarefa\UseCases\ListarTarefasUseCase;
 use Core\Domain\Tarefa\Entities\Quadro;
 use Core\Domain\Tarefa\Entities\StatusQuadro;
@@ -36,15 +38,17 @@ class TarefaUseCasesTest extends TestCase
 {
     use MockeryPHPUnitIntegration;
 
-    public function test_lista_tarefas_por_usuario(): void
+    public function test_lista_tarefas_agrupadas_por_status_do_quadro(): void
     {
-        $tarefas = [$this->tarefa()];
+        $colunas = [['status' => new StatusQuadro(1, 'Pendente', 20), 'tarefas' => [$this->tarefa()]]];
         $repository = Mockery::mock(TarefaRepository::class);
-        $repository->shouldReceive('listarPorUsuarioId')->once()->with(10)->andReturn($tarefas);
+        $repository->shouldReceive('listarAgrupadoPorStatusDoQuadro')->once()->with(20)->andReturn($colunas);
+        $quadroRepository = Mockery::mock(QuadroRepository::class);
+        $quadroRepository->shouldReceive('pertenceAoUsuario')->once()->with(20, 10)->andReturnTrue();
 
-        $resultado = (new ListarTarefasUseCase($repository))->executar(new ListarTarefasDTO(10));
+        $resultado = (new ListarTarefasUseCase($repository, $quadroRepository))->executar(new ListarTarefasDTO(10, 20));
 
-        $this->assertSame($tarefas, $resultado);
+        $this->assertSame($colunas, $resultado);
     }
 
     public function test_lista_quadros_por_usuario(): void
@@ -188,6 +192,20 @@ class TarefaUseCasesTest extends TestCase
         (new ApagarStatusQuadroUseCase($repository))->executar(1, 10);
 
         $this->addToAssertionCount(1);
+    }
+
+    public function test_lista_tarefas_paginadas_por_status(): void
+    {
+        $pagina = ['data' => [$this->tarefa()], 'current_page' => 2, 'last_page' => 3, 'total' => 25];
+        $repoTarefa = Mockery::mock(TarefaRepository::class);
+        $repoTarefa->shouldReceive('listarPorStatus')->once()->with(7, 2)->andReturn($pagina);
+        $repoStatus = Mockery::mock(StatusQuadroRepository::class);
+        $repoStatus->shouldReceive('pertenceAoUsuario')->once()->with(7, 10)->andReturnTrue();
+
+        $resultado = (new ListarTarefasPorStatusUseCase($repoTarefa, $repoStatus))
+            ->executar(new ListarTarefasPorStatusDTO(10, 7, 2));
+
+        $this->assertSame($pagina, $resultado);
     }
 
     private function tarefa(): Tarefa

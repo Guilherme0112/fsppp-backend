@@ -10,6 +10,10 @@ interface TarefaRepository
 
     public function listarPorUsuarioId(int $usuarioId): array;
 
+    public function listarAgrupadoPorStatusDoQuadro(int $quadroId, int $limitePorStatus = 10): array;
+
+    public function listarPorStatus(int $statusId, int $pagina, int $porPagina = 10): array;
+
     public function criar(int $quadroId, Tarefa $tarefa): Tarefa;
 
     public function atualizar(int $id, Tarefa $tarefa): Tarefa;

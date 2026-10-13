@@ -8,6 +8,8 @@ class ListarTarefasRequisicao extends RequisicaoAutenticada
 {
     public function rules(): array
     {
-        return [];
+        return [
+            'quadro_id' => ['required', 'integer', 'exists:quadros,id'],
+        ];
     }
 }

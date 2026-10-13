@@ -7,6 +7,8 @@ use Core\Application\Tarefa\DTOs\AtualizarStatusQuadroDTO;
 use Core\Application\Tarefa\DTOs\AtualizarTarefaDTO;
 use Core\Application\Tarefa\DTOs\CriarStatusQuadroDTO;
 use Core\Application\Tarefa\DTOs\CriarTarefaDTO;
+use Core\Application\Tarefa\DTOs\ListarTarefasDTO;
+use Core\Application\Tarefa\DTOs\ListarTarefasPorStatusDTO;
 use Core\Application\Tarefa\UseCases\ApagarQuadroUseCase;
 use Core\Application\Tarefa\UseCases\ApagarStatusQuadroUseCase;
 use Core\Application\Tarefa\UseCases\ApagarTarefaUseCase;
@@ -16,6 +18,8 @@ use Core\Application\Tarefa\UseCases\AtualizarTarefaUseCase;
 use Core\Application\Tarefa\UseCases\CriarStatusQuadroUseCase;
 use Core\Application\Tarefa\UseCases\CriarTarefaUseCase;
 use Core\Application\Tarefa\UseCases\ListarStatusQuadroUseCase;
+use Core\Application\Tarefa\UseCases\ListarTarefasPorStatusUseCase;
+use Core\Application\Tarefa\UseCases\ListarTarefasUseCase;
 use Core\Domain\Tarefa\Exceptions\RecursoNaoEncontradoException;
 use Core\Domain\Tarefa\Repositories\QuadroRepository;
 use Core\Domain\Tarefa\Repositories\StatusQuadroRepository;
@@ -98,6 +102,16 @@ class TarefaUseCasesErrorTest extends TestCase
         (new ApagarStatusQuadroUseCase($repoStatus))->executar(5, 10);
     }
 
+    public function test_listar_tarefas_lanca_excecao_quando_quadro_nao_pertence_ao_usuario(): void
+    {
+        $repoTarefa = Mockery::mock(TarefaRepository::class);
+        $repoQuadro = Mockery::mock(QuadroRepository::class);
+        $repoQuadro->shouldReceive('pertenceAoUsuario')->once()->with(1, 10)->andReturnFalse();
+
+        $this->expectException(RecursoNaoEncontradoException::class);
+        (new ListarTarefasUseCase($repoTarefa, $repoQuadro))->executar(new ListarTarefasDTO(10, 1));
+    }
+
     public function test_criar_tarefa_lanca_excecao_quando_quadro_nao_pertence_ao_usuario(): void
     {
         $repoTarefa = Mockery::mock(TarefaRepository::class);
@@ -169,5 +183,16 @@ class TarefaUseCasesErrorTest extends TestCase
 
         $this->expectException(RecursoNaoEncontradoException::class);
         (new ApagarTarefaUseCase($repoTarefa))->executar(10, 10);
+    }
+
+    public function test_listar_tarefas_por_status_lanca_excecao_quando_status_nao_pertence_ao_usuario(): void
+    {
+        $repoTarefa = Mockery::mock(TarefaRepository::class);
+        $repoStatus = Mockery::mock(StatusQuadroRepository::class);
+        $repoStatus->shouldReceive('pertenceAoUsuario')->once()->with(7, 10)->andReturnFalse();
+
+        $this->expectException(RecursoNaoEncontradoException::class);
+        (new ListarTarefasPorStatusUseCase($repoTarefa, $repoStatus))
+            ->executar(new ListarTarefasPorStatusDTO(10, 7, 1));
     }
 }

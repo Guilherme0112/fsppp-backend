@@ -5,6 +5,7 @@ namespace Tests\Unit\Application\Tarefa;
 use Core\Application\Tarefa\DTOs\AtualizarTarefaDTO;
 use Core\Application\Tarefa\DTOs\CriarTarefaDTO;
 use Core\Application\Tarefa\DTOs\ListarTarefasDTO;
+use Core\Application\Tarefa\DTOs\ListarTarefasPorStatusDTO;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 
@@ -90,8 +91,25 @@ class TarefaDTOsTest extends TestCase
 
     public function test_listar_tarefas_dto_da_requisicao(): void
     {
-        $dto = ListarTarefasDTO::daRequisicao([], 99);
+        $dto = ListarTarefasDTO::daRequisicao(['quadro_id' => 5], 99);
 
         $this->assertSame(99, $dto->usuarioId);
+        $this->assertSame(5, $dto->quadroId);
+    }
+
+    public function test_listar_tarefas_por_status_dto_da_requisicao_assume_pagina_1_por_padrao(): void
+    {
+        $dto = ListarTarefasPorStatusDTO::daRequisicao([], 7, 99);
+
+        $this->assertSame(99, $dto->usuarioId);
+        $this->assertSame(7, $dto->statusId);
+        $this->assertSame(1, $dto->pagina);
+    }
+
+    public function test_listar_tarefas_por_status_dto_da_requisicao_com_pagina_explicita(): void
+    {
+        $dto = ListarTarefasPorStatusDTO::daRequisicao(['page' => 3], 7, 99);
+
+        $this->assertSame(3, $dto->pagina);
     }
 }

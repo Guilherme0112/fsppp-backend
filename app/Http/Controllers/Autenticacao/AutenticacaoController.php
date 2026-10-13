@@ -15,9 +15,8 @@ class AutenticacaoController extends Controller
 {
     #[OA\Post(
         path: "/autenticacao/entrar",
-        summary: "Autenticar usuário",
         description: "Retorna o token de acesso para o usuário",
-        tags: ["Autenticação"],
+        summary: "Autenticar usuário",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -28,17 +27,18 @@ class AutenticacaoController extends Controller
                 ]
             )
         ),
+        tags: ["Autenticação"],
         responses: [
             new OA\Response(
                 response: 200,
                 description: "Autenticado com sucesso",
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "usuario", type: "object", properties: [
+                        new OA\Property(property: "usuario", properties: [
                             new OA\Property(property: "id", type: "integer"),
                             new OA\Property(property: "nome", type: "string"),
                             new OA\Property(property: "email", type: "string"),
-                        ]),
+                        ], type: "object"),
                         new OA\Property(property: "token", type: "string"),
                         new OA\Property(property: "tipo_token", type: "string", example: "Bearer"),
                     ]
@@ -57,10 +57,10 @@ class AutenticacaoController extends Controller
 
     #[OA\Post(
         path: "/autenticacao/sair",
-        summary: "Encerrar sessão",
         description: "Invalida o token de acesso atual",
-        tags: ["Autenticação"],
+        summary: "Encerrar sessão",
         security: [["bearerAuth" => []]],
+        tags: ["Autenticação"],
         responses: [
             new OA\Response(response: 204, description: "Sessão encerrada com sucesso"),
             new OA\Response(response: 401, description: "Não autenticado")

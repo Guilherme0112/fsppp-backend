@@ -20,8 +20,8 @@ class UsuarioController extends Controller
     #[OA\Get(
         path: '/usuarios',
         summary: 'Listar usuários',
-        tags: ['Usuários'],
         security: [['bearerAuth' => []]],
+        tags: ['Usuários'],
         responses: [
             new OA\Response(
                 response: 200,
@@ -54,7 +54,6 @@ class UsuarioController extends Controller
     #[OA\Post(
         path: '/usuarios',
         summary: 'Criar novo usuário',
-        tags: ['Usuários'],
         security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody(
             required: true,
@@ -66,6 +65,7 @@ class UsuarioController extends Controller
                 ]
             )
         ),
+        tags: ['Usuários'],
         responses: [
             new OA\Response(
                 response: 201,
@@ -94,11 +94,7 @@ class UsuarioController extends Controller
     #[OA\Put(
         path: '/usuarios/{id}',
         summary: 'Atualizar usuário existente',
-        tags: ['Usuários'],
         security: [['bearerAuth' => []]],
-        parameters: [
-            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -109,6 +105,10 @@ class UsuarioController extends Controller
                 ]
             )
         ),
+        tags: ['Usuários'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
         responses: [
             new OA\Response(
                 response: 200,
@@ -139,8 +139,8 @@ class UsuarioController extends Controller
     #[OA\Delete(
         path: '/usuarios/{id}',
         summary: 'Apagar usuário',
-        tags: ['Usuários'],
         security: [['bearerAuth' => []]],
+        tags: ['Usuários'],
         parameters: [
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],

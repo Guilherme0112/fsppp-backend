@@ -21,8 +21,8 @@ class QuadroController extends Controller
     #[OA\Get(
         path: "/quadros",
         summary: "Listar quadros do usuário",
-        tags: ["Quadros"],
         security: [["bearerAuth" => []]],
+        tags: ["Quadros"],
         responses: [
             new OA\Response(
                 response: 200,
@@ -54,7 +54,6 @@ class QuadroController extends Controller
     #[OA\Post(
         path: "/quadros",
         summary: "Criar novo quadro",
-        tags: ["Quadros"],
         security: [["bearerAuth" => []]],
         requestBody: new OA\RequestBody(
             required: true,
@@ -65,6 +64,7 @@ class QuadroController extends Controller
                 ]
             )
         ),
+        tags: ["Quadros"],
         responses: [
             new OA\Response(
                 response: 201,
@@ -94,11 +94,7 @@ class QuadroController extends Controller
     #[OA\Put(
         path: "/quadros/{id}",
         summary: "Editar quadro existente",
-        tags: ["Quadros"],
         security: [["bearerAuth" => []]],
-        parameters: [
-            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -108,6 +104,10 @@ class QuadroController extends Controller
                 ]
             )
         ),
+        tags: ["Quadros"],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
         responses: [
             new OA\Response(
                 response: 200,
@@ -139,8 +139,8 @@ class QuadroController extends Controller
     #[OA\Delete(
         path: "/quadros/{id}",
         summary: "Apagar quadro",
-        tags: ["Quadros"],
         security: [["bearerAuth" => []]],
+        tags: ["Quadros"],
         parameters: [
             new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))
         ],

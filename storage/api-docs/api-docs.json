@@ -615,42 +615,78 @@
                 "tags": [
                     "Tarefas"
                 ],
-                "summary": "Listar tarefas do usuário",
+                "summary": "Listar tarefas de um quadro agrupadas por status (kanban)",
                 "operationId": "9c9baa201df49c12abfafbdf5fb49636",
+                "parameters": [
+                    {
+                        "name": "quadro_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Lista de tarefas",
+                        "description": "Colunas do quadro, cada uma com as 10 tarefas mais recentes do status",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "array",
                                     "items": {
                                         "properties": {
-                                            "id": {
-                                                "type": "integer"
+                                            "status": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "nome": {
+                                                        "type": "string"
+                                                    },
+                                                    "descricao": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "quadro_id": {
+                                                        "type": "integer"
+                                                    }
+                                                },
+                                                "type": "object"
                                             },
-                                            "nome": {
-                                                "type": "string"
-                                            },
-                                            "descricao": {
-                                                "type": "string",
-                                                "nullable": true
-                                            },
-                                            "status_id": {
-                                                "type": "integer"
-                                            },
-                                            "quadro_id": {
-                                                "type": "integer"
-                                            },
-                                            "data_inicio": {
-                                                "type": "string",
-                                                "format": "date",
-                                                "nullable": true
-                                            },
-                                            "data_fim": {
-                                                "type": "string",
-                                                "format": "date",
-                                                "nullable": true
+                                            "tarefas": {
+                                                "type": "array",
+                                                "items": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer"
+                                                        },
+                                                        "nome": {
+                                                            "type": "string"
+                                                        },
+                                                        "descricao": {
+                                                            "type": "string",
+                                                            "nullable": true
+                                                        },
+                                                        "status_id": {
+                                                            "type": "integer"
+                                                        },
+                                                        "quadro_id": {
+                                                            "type": "integer"
+                                                        },
+                                                        "data_inicio": {
+                                                            "type": "string",
+                                                            "format": "date",
+                                                            "nullable": true
+                                                        },
+                                                        "data_fim": {
+                                                            "type": "string",
+                                                            "format": "date",
+                                                            "nullable": true
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
                                             }
                                         },
                                         "type": "object"
@@ -661,6 +697,12 @@
                     },
                     "401": {
                         "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Quadro não encontrado"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
                     }
                 },
                 "security": [
@@ -757,6 +799,105 @@
                     },
                     "401": {
                         "description": "Não autenticado"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/tarefas/status/{statusId}": {
+            "get": {
+                "tags": [
+                    "Tarefas"
+                ],
+                "summary": "Listar tarefas de um status/coluna, paginado",
+                "operationId": "c5be3302df88df4a28e38b0f411a4346",
+                "parameters": [
+                    {
+                        "name": "statusId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Página de tarefas do status, 10 por página",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "nome": {
+                                                        "type": "string"
+                                                    },
+                                                    "descricao": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "status_id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "quadro_id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "data_inicio": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "nullable": true
+                                                    },
+                                                    "data_fim": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer"
+                                        },
+                                        "last_page": {
+                                            "type": "integer"
+                                        },
+                                        "total": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Status não encontrado"
                     },
                     "422": {
                         "description": "Erro de validação"
@@ -915,6 +1056,238 @@
                     }
                 ]
             }
+        },
+        "/usuarios": {
+            "get": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Listar usuários",
+                "operationId": "1addad8df18e393b4100f9ad3b1e434e",
+                "responses": {
+                    "200": {
+                        "description": "Lista de usuários",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer"
+                                            },
+                                            "nome": {
+                                                "type": "string"
+                                            },
+                                            "email": {
+                                                "type": "string"
+                                            },
+                                            "criado_em": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "nullable": true
+                                            },
+                                            "atualizado_em": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "nullable": true
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Criar novo usuário",
+                "operationId": "8306ccf09798b625977aae5033ba980f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "João Silva"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "joao@example.com"
+                                    },
+                                    "senha": {
+                                        "type": "string",
+                                        "example": "secret123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuário criado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "nome": {
+                                            "type": "string"
+                                        },
+                                        "email": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/usuarios/{id}": {
+            "put": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Atualizar usuário existente",
+                "operationId": "614cd04c6a4b230508a5ec95e080f5b7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "João Atualizado"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "joao@example.com"
+                                    },
+                                    "senha": {
+                                        "type": "string",
+                                        "example": "novasenha123",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuário atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "nome": {
+                                            "type": "string"
+                                        },
+                                        "email": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Apagar usuário",
+                "operationId": "46a1d5bd7e15c53e04bc5caec2812f8b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Usuário apagado com sucesso"
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -944,6 +1317,10 @@
         {
             "name": "Tarefas",
             "description": "Tarefas"
+        },
+        {
+            "name": "Usuários",
+            "description": "Usuários"
         }
     ]
 }

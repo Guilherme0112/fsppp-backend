@@ -35,7 +35,6 @@ class StatusQuadroEloquentRepository implements StatusQuadroRepository
         return \DB::transaction(function () use ($id, $statusQuadro) {
             $modelo = StatusQuadroModelo::query()->findOrFail($id);
             $this->mapeador->paraModelo($statusQuadro, $modelo)->update();
-
             return $this->mapeador->paraEntidade($modelo->refresh());
         });
     }

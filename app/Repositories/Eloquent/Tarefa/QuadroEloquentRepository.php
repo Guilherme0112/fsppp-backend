@@ -12,7 +12,6 @@ class QuadroEloquentRepository implements QuadroRepository
 {
     public function __construct(private readonly QuadroMapeador $mapeador) {}
 
-    // todo: implementar o retorno para kanbam  
     public function listarPorUsuarioId(int $usuarioId): array
     {
         return QuadroModelo::query()

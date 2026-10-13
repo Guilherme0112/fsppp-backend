@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('/tarefas')->group(function () {
     Route::get('/', [TarefaController::class, 'listarTarefas']);
+    Route::get('/status/{statusId}', [TarefaController::class, 'listarTarefasPorStatus']);
     Route::post('/', [TarefaController::class, 'criarTarefa']);
     Route::put('/{id}', [TarefaController::class, 'atualizarTarefa']);
     Route::delete('/{id}', [TarefaController::class, 'apagarTarefa']);

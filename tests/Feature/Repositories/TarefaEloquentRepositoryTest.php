@@ -182,6 +182,89 @@ class TarefaEloquentRepositoryTest extends TestCase
         $this->assertCount(1, $dados);
     }
 
+    public function test_listar_agrupado_por_status_do_quadro_retorna_colunas_com_ate_dez_tarefas_cada(): void
+    {
+        $outroStatus = StatusQuadroModelo::query()->create([
+            'nome' => 'Concluído',
+            'quadro_id' => $this->quadro->id,
+        ]);
+
+        $outroQuadro = QuadroModelo::query()->create([
+            'nome' => 'Outro Quadro',
+            'usuario_id' => $this->usuario->id,
+        ]);
+        $statusDeOutroQuadro = StatusQuadroModelo::query()->create([
+            'nome' => 'Status de Outro Quadro',
+            'quadro_id' => $outroQuadro->id,
+        ]);
+        TarefaModelo::query()->create([
+            'nome' => 'Tarefa de Outro Quadro',
+            'quadro_id' => $outroQuadro->id,
+            'status_id' => $statusDeOutroQuadro->id,
+        ]);
+
+        for ($i = 1; $i <= 12; $i++) {
+            $tarefa = new TarefaModelo;
+            $tarefa->forceFill([
+                'nome' => "Tarefa Pendente {$i}",
+                'quadro_id' => $this->quadro->id,
+                'status_id' => $this->status->id,
+                'criado_em' => now()->addMinutes($i),
+            ]);
+            $tarefa->save();
+        }
+
+        TarefaModelo::query()->create([
+            'nome' => 'Tarefa Concluída',
+            'quadro_id' => $this->quadro->id,
+            'status_id' => $outroStatus->id,
+        ]);
+
+        $resultado = $this->repository->listarAgrupadoPorStatusDoQuadro($this->quadro->id);
+
+        $this->assertCount(2, $resultado);
+
+        $colunaPendente = collect($resultado)->firstWhere(fn ($coluna) => $coluna['status']->id() === $this->status->id);
+        $this->assertCount(10, $colunaPendente['tarefas']['data']);
+        $this->assertSame('Tarefa Pendente 12', $colunaPendente['tarefas']['data'][0]->nome());
+        $this->assertSame(1, $colunaPendente['tarefas']['current_page']);
+        $this->assertSame(2, $colunaPendente['tarefas']['last_page']);
+        $this->assertSame(12, $colunaPendente['tarefas']['total']);
+
+        $colunaConcluido = collect($resultado)->firstWhere(fn ($coluna) => $coluna['status']->id() === $outroStatus->id);
+        $this->assertCount(1, $colunaConcluido['tarefas']['data']);
+        $this->assertSame('Tarefa Concluída', $colunaConcluido['tarefas']['data'][0]->nome());
+        $this->assertSame(1, $colunaConcluido['tarefas']['current_page']);
+        $this->assertSame(1, $colunaConcluido['tarefas']['last_page']);
+        $this->assertSame(1, $colunaConcluido['tarefas']['total']);
+    }
+
+    public function test_listar_por_status_retorna_a_pagina_solicitada_com_dez_por_pagina(): void
+    {
+        for ($i = 1; $i <= 15; $i++) {
+            $tarefa = new TarefaModelo;
+            $tarefa->forceFill([
+                'nome' => "Tarefa {$i}",
+                'quadro_id' => $this->quadro->id,
+                'status_id' => $this->status->id,
+                'criado_em' => now()->addMinutes($i),
+            ]);
+            $tarefa->save();
+        }
+
+        $primeiraPagina = $this->repository->listarPorStatus($this->status->id, 1);
+        $this->assertCount(10, $primeiraPagina['data']);
+        $this->assertSame(1, $primeiraPagina['current_page']);
+        $this->assertSame(2, $primeiraPagina['last_page']);
+        $this->assertSame(15, $primeiraPagina['total']);
+        $this->assertSame('Tarefa 15', $primeiraPagina['data'][0]->nome());
+
+        $segundaPagina = $this->repository->listarPorStatus($this->status->id, 2);
+        $this->assertCount(5, $segundaPagina['data']);
+        $this->assertSame(2, $segundaPagina['current_page']);
+        $this->assertSame('Tarefa 5', $segundaPagina['data'][0]->nome());
+    }
+
     public function test_pertence_ao_usuario(): void
     {
         $outroUsuario = Usuario::query()->create([

@@ -3,6 +3,8 @@
 namespace App\Models\Tarefa;
 
 use App\Models\ModelBase;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class StatusQuadro extends ModelBase
 {
@@ -26,8 +28,13 @@ class StatusQuadro extends ModelBase
 
     const DELETED_AT = 'apagado_em';
 
-    public function quadro()
+    public function quadro(): BelongsTo
     {
         return $this->belongsTo(Quadro::class, 'quadro_id');
+    }
+
+    public function tarefas(): HasMany
+    {
+        return $this->hasMany(Tarefa::class, 'status_id');
     }
 }

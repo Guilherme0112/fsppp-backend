@@ -45,7 +45,7 @@ class TarefaControllerTest extends TestCase
         $this->getJson('/api/v1/tarefas')->assertUnauthorized();
     }
 
-    public function test_listar_tarefas_retorna_apenas_tarefas_do_usuario_autenticado(): void
+    public function test_listar_tarefas_retorna_colunas_do_quadro_agrupadas_por_status(): void
     {
         $outroUsuario = Usuario::query()->create([
             'nome' => 'Outro Usuario',
@@ -74,12 +74,91 @@ class TarefaControllerTest extends TestCase
         ]);
 
         $resposta = $this->withToken($this->token)
-            ->getJson('/api/v1/tarefas')
+            ->getJson("/api/v1/tarefas?quadro_id={$this->quadro->id}")
             ->assertOk();
 
-        $dados = $resposta->json('data');
-        $this->assertCount(1, $dados);
-        $this->assertSame('Minha Tarefa', $dados[0]['nome']);
+        $colunas = $resposta->json();
+        $this->assertCount(1, $colunas);
+        $this->assertSame($this->status->id, $colunas[0]['status']['id']);
+        $this->assertCount(1, $colunas[0]['tarefas']['data']);
+        $this->assertSame('Minha Tarefa', $colunas[0]['tarefas']['data'][0]['nome']);
+        $this->assertSame(1, $colunas[0]['tarefas']['current_page']);
+        $this->assertSame(1, $colunas[0]['tarefas']['last_page']);
+        $this->assertSame(1, $colunas[0]['tarefas']['total']);
+    }
+
+    public function test_listar_tarefas_exige_quadro_id(): void
+    {
+        $this->withToken($this->token)
+            ->getJson('/api/v1/tarefas')
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['quadro_id']);
+    }
+
+    public function test_listar_tarefas_retorna_404_se_quadro_nao_pertence_ao_usuario(): void
+    {
+        $outroUsuario = Usuario::query()->create([
+            'nome' => 'Outro Usuario',
+            'email' => 'outro@example.com',
+            'senha' => 'senha-correta',
+        ]);
+        $outroQuadro = Quadro::query()->create([
+            'nome' => 'Quadro Alheio',
+            'usuario_id' => $outroUsuario->id,
+        ]);
+
+        $this->withToken($this->token)
+            ->getJson("/api/v1/tarefas?quadro_id={$outroQuadro->id}")
+            ->assertNotFound();
+    }
+
+    public function test_listar_tarefas_por_status_exige_autenticacao(): void
+    {
+        $this->getJson("/api/v1/tarefas/status/{$this->status->id}")->assertUnauthorized();
+    }
+
+    public function test_listar_tarefas_por_status_retorna_segunda_pagina(): void
+    {
+        for ($i = 1; $i <= 15; $i++) {
+            $tarefa = new Tarefa;
+            $tarefa->forceFill([
+                'nome' => "Tarefa {$i}",
+                'quadro_id' => $this->quadro->id,
+                'status_id' => $this->status->id,
+                'criado_em' => now()->addMinutes($i),
+            ]);
+            $tarefa->save();
+        }
+
+        $resposta = $this->withToken($this->token)
+            ->getJson("/api/v1/tarefas/status/{$this->status->id}?page=2")
+            ->assertOk();
+
+        $resposta->assertJsonStructure(['data', 'current_page', 'last_page', 'total']);
+        $this->assertCount(5, $resposta->json('data'));
+        $this->assertSame(2, $resposta->json('current_page'));
+        $this->assertSame('Tarefa 5', $resposta->json('data.0.nome'));
+    }
+
+    public function test_listar_tarefas_por_status_retorna_404_se_status_nao_pertence_ao_usuario(): void
+    {
+        $outroUsuario = Usuario::query()->create([
+            'nome' => 'Outro Usuario',
+            'email' => 'outro@example.com',
+            'senha' => 'senha-correta',
+        ]);
+        $outroQuadro = Quadro::query()->create([
+            'nome' => 'Quadro Alheio',
+            'usuario_id' => $outroUsuario->id,
+        ]);
+        $outroStatus = StatusQuadro::query()->create([
+            'nome' => 'Status Alheio',
+            'quadro_id' => $outroQuadro->id,
+        ]);
+
+        $this->withToken($this->token)
+            ->getJson("/api/v1/tarefas/status/{$outroStatus->id}")
+            ->assertNotFound();
     }
 
     public function test_criar_tarefa_com_sucesso(): void
