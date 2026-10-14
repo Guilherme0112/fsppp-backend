@@ -10,6 +10,8 @@ class SessaoAutenticada implements JsonSerializable
         public Usuario $usuario,
         public string $token,
         public string $tipoToken = 'Bearer',
+        /** @var list<string> */
+        public array $permissoes = [],
     ) {}
 
     public function jsonSerialize(): array
@@ -18,6 +20,7 @@ class SessaoAutenticada implements JsonSerializable
             'usuario' => $this->usuario->paraArray(),
             'token' => $this->token,
             'tipo_token' => $this->tipoToken,
+            'permissoes' => $this->permissoes,
         ];
     }
 }

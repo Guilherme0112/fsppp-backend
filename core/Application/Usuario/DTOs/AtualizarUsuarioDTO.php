@@ -11,6 +11,8 @@ readonly class AtualizarUsuarioDTO
         public string $nome,
         public string $email,
         public ?string $senha = null,
+        /** @var list<string> */
+        public array $papeis = [],
     ) {}
 
     public static function daRequisicao(array $dados, int $id): self
@@ -20,6 +22,7 @@ readonly class AtualizarUsuarioDTO
             nome: $dados['nome'],
             email: $dados['email'],
             senha: $dados['senha'] ?? null,
+            papeis: $dados['papeis'] ?? [],
         );
     }
 
@@ -30,6 +33,7 @@ readonly class AtualizarUsuarioDTO
             nome: $this->nome,
             email: $this->email,
             senha: $this->senha ?? '',
+            papeis: $this->papeis,
         );
     }
 }

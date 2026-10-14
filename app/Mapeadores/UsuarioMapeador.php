@@ -20,17 +20,23 @@ class UsuarioMapeador
             remember_token: $modelo->remember_token,
             criado_em: $this->paraDataImutavel($modelo->criado_em),
             atualizado_em: $this->paraDataImutavel($modelo->atualizado_em),
+            papeis: $modelo->exists ? $modelo->getRoleNames()->values()->all() : [],
         );
     }
 
     public function paraModelo(UsuarioEntidade $entidade, ?UsuarioModelo $modelo = null): UsuarioModelo
     {
         $modelo ??= new UsuarioModelo;
-        $modelo->fill([
+        $dados = [
             'nome' => $entidade->nome(),
             'email' => $entidade->email(),
-            'senha' => $entidade->senha(),
-        ]);
+        ];
+        // Em atualizações sem nova senha, a entidade chega com senha vazia — não deve
+        // sobrescrever o hash existente no banco.
+        if ($entidade->senha() !== '') {
+            $dados['senha'] = $entidade->senha();
+        }
+        $modelo->fill($dados);
         $modelo->remember_token = $entidade->tokenLembranca();
         $this->aplicar($modelo, $entidade->id(), [
             'email_verificado_em' => $entidade->emailVerificadoEm(),

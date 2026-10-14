@@ -12,6 +12,8 @@ class SalvarUsuarioRequisicao extends RequisicaoAutenticada
             'nome'  => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'senha' => ['nullable', 'string', 'min:6'],
+            'papeis' => ['nullable', 'array'],
+            'papeis.*' => ['string', 'exists:roles,name'],
         ];
     }
 }

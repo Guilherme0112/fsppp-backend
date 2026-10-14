@@ -18,6 +18,19 @@ class Endereco
         private readonly ?\DateTimeImmutable $apagado_em = null,
     ) {}
 
+    public static function criarDoConexa(array $endereco): self
+    {
+        return new self(
+            id: null,
+            logradouro: $endereco['street'] ?? '',
+            numero: $endereco['number'] ?? '',
+            complemento: $endereco['additionalDetails'] ?? '',
+            bairro: $endereco['neighborhood'] ?? '',
+            cidade: $endereco['city'] ?? '',
+            estado: $endereco['state']['abbreviation'] ?? '',
+        );
+    }
+
     public function id(): ?int
     {
         return $this->id;
@@ -71,5 +84,18 @@ class Endereco
     public function apagadoEm(): ?\DateTimeImmutable
     {
         return $this->apagado_em;
+    }
+
+    public function obterEnderecoUnicaLinha(): string
+    {
+        return sprintf(
+            '%s, %s - %s, %s, %s - %s',
+            $this->logradouro ?? '',
+            $this->numero ?? '',
+            $this->bairro ?? '',
+            $this->complemento ?? '',
+            $this->cidade ?? '',
+            $this->estado ?? '',
+        );
     }
 }

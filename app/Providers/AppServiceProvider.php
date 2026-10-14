@@ -2,11 +2,13 @@
 
 namespace App\Providers;
 
+use App\Repositories\Eloquent\SolicitacaoPagamento\SolicitacaoPagamentoEloquentRepository;
 use App\Repositories\Eloquent\Tarefa\QuadroEloquentRepository;
 use App\Repositories\Eloquent\Tarefa\StatusQuadroEloquentRepository;
 use App\Repositories\Eloquent\Tarefa\TarefaEloquentRepository;
 use App\Repositories\Eloquent\Usuario\SanctumAutenticacaoRepository;
 use App\Repositories\Eloquent\Usuario\UsuarioEloquentRepository;
+use Core\Domain\SolicitacaoPagamento\Repositories\SolicitacaoPagamentoRepository;
 use Core\Domain\Tarefa\Repositories\QuadroRepository;
 use Core\Domain\Tarefa\Repositories\StatusQuadroRepository;
 use Core\Domain\Tarefa\Repositories\TarefaRepository;
@@ -26,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(StatusQuadroRepository::class, StatusQuadroEloquentRepository::class);
         $this->app->bind(AutenticacaoRepository::class, SanctumAutenticacaoRepository::class);
         $this->app->bind(UsuarioRepository::class, UsuarioEloquentRepository::class);
+        $this->app->bind(SolicitacaoPagamentoRepository::class, SolicitacaoPagamentoEloquentRepository::class);
     }
 
     /**

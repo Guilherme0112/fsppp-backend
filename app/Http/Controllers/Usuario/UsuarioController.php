@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Usuario;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requisicoes\Usuario\ListarUsuariosRequisicao;
 use App\Http\Requisicoes\Usuario\SalvarUsuarioRequisicao;
 use App\Http\Requisicoes\UsuarioAutenticadoRequisicao;
 use Core\Application\Usuario\DTOs\AtualizarUsuarioDTO;
@@ -22,28 +23,41 @@ class UsuarioController extends Controller
         summary: 'Listar usuários',
         security: [['bearerAuth' => []]],
         tags: ['Usuários'],
+        parameters: [
+            new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 1)),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 20)),
+        ],
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Lista de usuários',
+                description: 'Página de usuários, 20 por página (Laravel LengthAwarePaginator::toArray())',
                 content: new OA\JsonContent(
-                    type: 'array',
-                    items: new OA\Items(
-                        properties: [
-                            new OA\Property(property: 'id', type: 'integer'),
-                            new OA\Property(property: 'nome', type: 'string'),
-                            new OA\Property(property: 'email', type: 'string'),
-                            new OA\Property(property: 'criado_em', type: 'string', format: 'date-time', nullable: true),
-                            new OA\Property(property: 'atualizado_em', type: 'string', format: 'date-time', nullable: true),
-                        ]
-                    )
+                    properties: [
+                        new OA\Property(
+                            property: 'data',
+                            type: 'array',
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: 'id', type: 'integer'),
+                                    new OA\Property(property: 'nome', type: 'string'),
+                                    new OA\Property(property: 'email', type: 'string'),
+                                    new OA\Property(property: 'criado_em', type: 'string', format: 'date-time', nullable: true),
+                                    new OA\Property(property: 'atualizado_em', type: 'string', format: 'date-time', nullable: true),
+                                    new OA\Property(property: 'papeis', type: 'array', items: new OA\Items(type: 'string')),
+                                ]
+                            )
+                        ),
+                        new OA\Property(property: 'current_page', type: 'integer'),
+                        new OA\Property(property: 'last_page', type: 'integer'),
+                        new OA\Property(property: 'total', type: 'integer'),
+                    ]
                 )
             ),
             new OA\Response(response: 401, description: 'Não autenticado'),
         ]
     )]
     public function listarUsuarios(
-        UsuarioAutenticadoRequisicao $requisicao,
+        ListarUsuariosRequisicao $requisicao,
         ListarUsuariosUseCase $casoDeUso,
     ): JsonResponse {
         return response()->json($casoDeUso->executar(
@@ -62,6 +76,7 @@ class UsuarioController extends Controller
                     new OA\Property(property: 'nome', type: 'string', example: 'João Silva'),
                     new OA\Property(property: 'email', type: 'string', example: 'joao@example.com'),
                     new OA\Property(property: 'senha', type: 'string', example: 'secret123'),
+                    new OA\Property(property: 'papeis', type: 'array', items: new OA\Items(type: 'string', example: 'Usuário Comum')),
                 ]
             )
         ),
@@ -75,6 +90,7 @@ class UsuarioController extends Controller
                         new OA\Property(property: 'id', type: 'integer'),
                         new OA\Property(property: 'nome', type: 'string'),
                         new OA\Property(property: 'email', type: 'string'),
+                        new OA\Property(property: 'papeis', type: 'array', items: new OA\Items(type: 'string')),
                     ]
                 )
             ),
@@ -102,6 +118,7 @@ class UsuarioController extends Controller
                     new OA\Property(property: 'nome', type: 'string', example: 'João Atualizado'),
                     new OA\Property(property: 'email', type: 'string', example: 'joao@example.com'),
                     new OA\Property(property: 'senha', type: 'string', example: 'novasenha123', nullable: true),
+                    new OA\Property(property: 'papeis', type: 'array', items: new OA\Items(type: 'string', example: 'Usuário Comum')),
                 ]
             )
         ),
@@ -118,6 +135,7 @@ class UsuarioController extends Controller
                         new OA\Property(property: 'id', type: 'integer'),
                         new OA\Property(property: 'nome', type: 'string'),
                         new OA\Property(property: 'email', type: 'string'),
+                        new OA\Property(property: 'papeis', type: 'array', items: new OA\Items(type: 'string')),
                     ]
                 )
             ),

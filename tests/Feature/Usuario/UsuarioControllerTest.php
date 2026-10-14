@@ -3,6 +3,7 @@
 namespace Tests\Feature\Usuario;
 
 use App\Models\Usuario;
+use Database\Seeders\PermissaoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -254,5 +255,103 @@ class UsuarioControllerTest extends TestCase
 
         $this->assertArrayNotHasKey('senha', $resposta->json(),
             'A senha nunca deve aparecer na resposta JSON');
+    }
+
+    // ─── Papéis ───────────────────────────────────────────────────────────────
+
+    public function test_listar_papeis_retorna_os_papeis_seedados(): void
+    {
+        $this->seed(PermissaoSeeder::class);
+
+        $resposta = $this->withToken($this->token)->getJson('/api/v1/papeis')->assertOk();
+
+        $this->assertEqualsCanonicalizing(
+            ['Admin', 'Quadros e Tarefas', 'Pagamentos', 'Aprovador Pagamentos', 'Usuários'],
+            $resposta->json(),
+        );
+    }
+
+    public function test_criar_usuario_com_papeis_atribui_os_papeis(): void
+    {
+        $this->seed(PermissaoSeeder::class);
+
+        $resposta = $this->withToken($this->token)
+            ->postJson('/api/v1/usuarios', [
+                'nome' => 'Com Papeis',
+                'email' => 'compapeis@example.com',
+                'senha' => 'senha123',
+                'papeis' => ['Pagamentos', 'Aprovador Pagamentos'],
+            ])
+            ->assertCreated();
+
+        $this->assertEqualsCanonicalizing(['Pagamentos', 'Aprovador Pagamentos'], $resposta->json('papeis'));
+
+        $criado = Usuario::query()->where('email', 'compapeis@example.com')->first();
+        $this->assertTrue($criado->hasRole('Pagamentos'));
+        $this->assertTrue($criado->hasRole('Aprovador Pagamentos'));
+    }
+
+    public function test_criar_usuario_com_papel_invalido_retorna_422(): void
+    {
+        $this->seed(PermissaoSeeder::class);
+
+        $this->withToken($this->token)
+            ->postJson('/api/v1/usuarios', [
+                'nome' => 'Papel Invalido',
+                'email' => 'invalido@example.com',
+                'senha' => 'senha123',
+                'papeis' => ['Papel Que Não Existe'],
+            ])
+            ->assertJsonValidationErrors(['papeis.0']);
+    }
+
+    public function test_atualizar_usuario_troca_os_papeis(): void
+    {
+        $this->seed(PermissaoSeeder::class);
+
+        $alvo = Usuario::query()->create(['nome' => 'Alvo', 'email' => 'alvo@example.com', 'senha' => 'senha']);
+        $alvo->assignRole('Pagamentos');
+
+        $resposta = $this->withToken($this->token)
+            ->putJson("/api/v1/usuarios/{$alvo->id}", [
+                'nome' => 'Alvo',
+                'email' => 'alvo@example.com',
+                'papeis' => ['Admin', 'Aprovador Pagamentos'],
+            ])
+            ->assertOk();
+
+        $this->assertEqualsCanonicalizing(['Admin', 'Aprovador Pagamentos'], $resposta->json('papeis'));
+        $this->assertTrue($alvo->fresh()->hasRole('Admin'));
+        $this->assertTrue($alvo->fresh()->hasRole('Aprovador Pagamentos'));
+        $this->assertFalse($alvo->fresh()->hasRole('Pagamentos'));
+    }
+
+    public function test_atualizar_usuario_sem_papeis_remove_todos_os_papeis_atuais(): void
+    {
+        $this->seed(PermissaoSeeder::class);
+
+        $alvo = Usuario::query()->create(['nome' => 'Alvo', 'email' => 'alvo2@example.com', 'senha' => 'senha']);
+        $alvo->assignRole('Pagamentos');
+
+        $this->withToken($this->token)
+            ->putJson("/api/v1/usuarios/{$alvo->id}", [
+                'nome' => 'Alvo',
+                'email' => 'alvo2@example.com',
+            ])
+            ->assertOk()
+            ->assertJsonPath('papeis', []);
+
+        $this->assertCount(0, $alvo->fresh()->getRoleNames());
+    }
+
+    public function test_listar_usuarios_retorna_os_papeis_atuais(): void
+    {
+        $this->seed(PermissaoSeeder::class);
+        $this->usuario->assignRole(['Admin', 'Aprovador Pagamentos']);
+
+        $resposta = $this->withToken($this->token)->getJson('/api/v1/usuarios')->assertOk();
+
+        $usuarioNaLista = collect($resposta->json('data'))->firstWhere('id', $this->usuario->id);
+        $this->assertEqualsCanonicalizing(['Admin', 'Aprovador Pagamentos'], $usuarioNaLista['papeis']);
     }
 }

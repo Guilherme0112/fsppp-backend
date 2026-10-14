@@ -13,6 +13,8 @@ class Usuario implements \JsonSerializable
         private readonly ?string $remember_token = null,
         private readonly ?\DateTimeImmutable $criado_em = null,
         private readonly ?\DateTimeImmutable $atualizado_em = null,
+        /** @var list<string> */
+        private readonly array $papeis = [],
     ) {}
 
     public function id(): ?int
@@ -55,6 +57,12 @@ class Usuario implements \JsonSerializable
         return $this->atualizado_em;
     }
 
+    /** @return list<string> */
+    public function papeis(): array
+    {
+        return $this->papeis;
+    }
+
     public function paraArray(): array
     {
         return [
@@ -64,6 +72,7 @@ class Usuario implements \JsonSerializable
             'email_verificado_em' => $this->email_verificado_em?->format(DATE_ATOM),
             'criado_em' => $this->criado_em?->format(DATE_ATOM),
             'atualizado_em' => $this->atualizado_em?->format(DATE_ATOM),
+            'papeis' => $this->papeis,
         ];
     }
 

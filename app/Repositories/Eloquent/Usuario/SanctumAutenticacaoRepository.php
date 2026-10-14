@@ -24,6 +24,7 @@ class SanctumAutenticacaoRepository implements AutenticacaoRepository
         return new SessaoAutenticada(
             usuario: $this->mapeador->paraEntidade($usuario),
             token: $usuario->createToken($nomeDispositivo)->plainTextToken,
+            permissoes: $usuario->getAllPermissions()->pluck('name')->all(),
         );
     }
 

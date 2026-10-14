@@ -15,12 +15,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Usuario::query()->updateOrCreate(
+        $this->call(PermissaoSeeder::class);
+
+        $usuario = Usuario::query()->updateOrCreate(
             ['email' => 'test@example.com'],
             [
                 'nome' => 'Test User',
                 'senha' => bcrypt('senha'),
             ],
         );
+        $usuario->syncRoles(['Admin']);
+
+        $this->call(DadosFakeSeeder::class);
     }
 }

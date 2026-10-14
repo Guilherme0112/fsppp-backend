@@ -7,18 +7,24 @@ use App\Models\Tarefa\Tarefa;
 use Database\Factories\UsuarioFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class Usuario extends Authenticatable
 {
     /** @use HasFactory<UsuarioFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes;
+
+    protected $guard_name = 'web';
 
     public const CREATED_AT = 'criado_em';
 
     public const UPDATED_AT = 'atualizado_em';
+
+    public const DELETED_AT = 'apagado_em';
 
     protected $fillable = [
         'nome',
@@ -47,6 +53,7 @@ class Usuario extends Authenticatable
             'email_verificado_em' => 'datetime',
             'criado_em' => 'datetime',
             'atualizado_em' => 'datetime',
+            'apagado_em' => 'datetime',
             'senha' => 'hashed',
         ];
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Usuario\PapelController;
 use App\Http\Controllers\Usuario\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
@@ -9,3 +10,5 @@ Route::prefix('/usuarios')->group(function () {
     Route::put('/{id}', [UsuarioController::class, 'atualizarUsuario']);
     Route::delete('/{id}', [UsuarioController::class, 'apagarUsuario']);
 });
+
+Route::get('/papeis', [PapelController::class, 'listarPapeis']);

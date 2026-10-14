@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Middleware\ForcarRespostaJson;
+use Core\Domain\SolicitacaoPagamento\Exceptions\SolicitacaoNaoEditavelException;
+use Core\Domain\SolicitacaoPagamento\Exceptions\SolicitacaoNaoEncontradaException;
+use Core\Domain\SolicitacaoPagamento\Exceptions\TransicaoStatusInvalidaException;
 use Core\Domain\Tarefa\Exceptions\RecursoNaoEncontradoException;
 use Core\Domain\Usuario\Exceptions\CredenciaisInvalidasException;
 use Illuminate\Auth\AuthenticationException;
@@ -20,6 +23,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prependToGroup('api', ForcarRespostaJson::class);
+        $middleware->alias([
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(function (Request $request): bool {
@@ -38,5 +46,17 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (RecursoNaoEncontradoException $exception) {
             return response()->json(['mensagem' => $exception->getMessage()], 404);
+        });
+
+        $exceptions->render(function (SolicitacaoNaoEncontradaException $exception) {
+            return response()->json(['mensagem' => $exception->getMessage()], 404);
+        });
+
+        $exceptions->render(function (SolicitacaoNaoEditavelException $exception) {
+            return response()->json(['mensagem' => $exception->getMessage()], 409);
+        });
+
+        $exceptions->render(function (TransicaoStatusInvalidaException $exception) {
+            return response()->json(['mensagem' => $exception->getMessage()], 409);
         });
     })->create();

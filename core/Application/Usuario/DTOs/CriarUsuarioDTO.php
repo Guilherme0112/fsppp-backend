@@ -10,6 +10,8 @@ readonly class CriarUsuarioDTO
         public string $nome,
         public string $email,
         public string $senha,
+        /** @var list<string> */
+        public array $papeis = [],
     ) {}
 
     public static function daRequisicao(array $dados): self
@@ -18,6 +20,7 @@ readonly class CriarUsuarioDTO
             nome: $dados['nome'],
             email: $dados['email'],
             senha: $dados['senha'],
+            papeis: $dados['papeis'] ?? [],
         );
     }
 
@@ -28,6 +31,7 @@ readonly class CriarUsuarioDTO
             nome: $this->nome,
             email: $this->email,
             senha: $this->senha,
+            papeis: $this->papeis,
         );
     }
 }

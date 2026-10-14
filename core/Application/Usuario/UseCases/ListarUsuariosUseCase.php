@@ -11,6 +11,6 @@ class ListarUsuariosUseCase
 
     public function executar(ListarUsuariosDTO $dto): array
     {
-        return $this->usuarioRepository->listar();
+        return $this->usuarioRepository->listar($dto->pagina, $dto->porPagina);
     }
 }
