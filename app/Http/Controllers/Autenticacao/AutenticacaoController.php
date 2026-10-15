@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Autenticacao;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requisicoes\Autenticacao\EntrarRequisicao;
+use App\Mapeadores\UsuarioMapeador;
 use Core\Application\Usuario\DTOs\EntrarDTO;
 use Core\Application\Usuario\UseCases\EntrarUseCase;
 use Core\Application\Usuario\UseCases\SairUseCase;
@@ -70,5 +71,39 @@ class AutenticacaoController extends Controller
     {
         $casoDeUso->executar((int) $requisicao->user()->currentAccessToken()->getKey());
         return response()->json(null, 204);
+    }
+
+    #[OA\Get(
+        path: "/autenticacao/perfil",
+        description: "Retorna os dados e as permissões atuais do usuário autenticado, recalculadas a partir dos seus papéis",
+        summary: "Dados da sessão atual",
+        security: [["bearerAuth" => []]],
+        tags: ["Autenticação"],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Sessão atual",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "usuario", properties: [
+                            new OA\Property(property: "id", type: "integer"),
+                            new OA\Property(property: "nome", type: "string"),
+                            new OA\Property(property: "email", type: "string"),
+                        ], type: "object"),
+                        new OA\Property(property: "permissoes", type: "array", items: new OA\Items(type: "string")),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: "Não autenticado")
+        ]
+    )]
+    public function perfil(Request $requisicao, UsuarioMapeador $mapeador): JsonResponse
+    {
+        $usuario = $requisicao->user();
+
+        return response()->json([
+            'usuario' => $mapeador->paraEntidade($usuario)->paraArray(),
+            'permissoes' => $usuario->getAllPermissions()->pluck('name')->all(),
+        ]);
     }
 }

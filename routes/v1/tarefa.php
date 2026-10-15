@@ -6,23 +6,46 @@ use App\Http\Controllers\Tarefa\TarefaController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/tarefas')->group(function () {
-    Route::get('/', [TarefaController::class, 'listarTarefas']);
-    Route::get('/status/{statusId}', [TarefaController::class, 'listarTarefasPorStatus']);
-    Route::post('/', [TarefaController::class, 'criarTarefa']);
-    Route::put('/{id}', [TarefaController::class, 'atualizarTarefa']);
-    Route::delete('/{id}', [TarefaController::class, 'apagarTarefa']);
+    Route::get('/', [TarefaController::class, 'listarTarefas'])
+        ->middleware('permission:tarefas.listar');
+
+    Route::get('/status/{statusId}', [TarefaController::class, 'listarTarefasPorStatus'])
+        ->middleware('permission:tarefas.listar');
+
+    Route::post('/', [TarefaController::class, 'criarTarefa'])
+        ->middleware('permission:tarefas.criar');
+
+    Route::put('/{id}', [TarefaController::class, 'atualizarTarefa'])
+        ->middleware('permission:tarefas.editar');
+
+    Route::delete('/{id}', [TarefaController::class, 'apagarTarefa'])
+        ->middleware('permission:tarefas.deletar');
 });
 
 Route::prefix('/status-quadro')->group(function () {
-    Route::get('/{quadroId}', [StatusQuadroController::class, 'listarStatusPorQuadro']);
-    Route::post('/{quadroId}', [StatusQuadroController::class, 'criarStatus']);
-    Route::put('/{quadroId}/{id}', [StatusQuadroController::class, 'editarStatus']);
-    Route::delete('/{quadroId}/{id}', [StatusQuadroController::class, 'apagarStatus']);
+    Route::get('/{quadroId}', [StatusQuadroController::class, 'listarStatusPorQuadro'])
+        ->middleware('permission:quadros.listar');
+
+    Route::post('/{quadroId}', [StatusQuadroController::class, 'criarStatus'])
+        ->middleware('permission:quadros.editar');
+
+    Route::put('/{quadroId}/{id}', [StatusQuadroController::class, 'editarStatus'])
+        ->middleware('permission:quadros.editar');
+
+    Route::delete('/{quadroId}/{id}', [StatusQuadroController::class, 'apagarStatus'])
+        ->middleware('permission:quadros.editar');
 });
 
 Route::prefix('/quadros')->group(function () {
-    Route::get('/', [QuadroController::class, 'listarQuadros']);
-    Route::post('/', [QuadroController::class, 'criarQuadro']);
-    Route::put('/{id}', [QuadroController::class, 'editarQuadro']);
-    Route::delete('/{id}', [QuadroController::class, 'apagarQuadro']);
+    Route::get('/', [QuadroController::class, 'listarQuadros'])
+        ->middleware('permission:quadros.listar');
+
+    Route::post('/', [QuadroController::class, 'criarQuadro'])
+        ->middleware('permission:quadros.criar');
+
+    Route::put('/{id}', [QuadroController::class, 'editarQuadro'])
+        ->middleware('permission:quadros.editar');
+
+    Route::delete('/{id}', [QuadroController::class, 'apagarQuadro'])
+        ->middleware('permission:quadros.deletar');
 });
