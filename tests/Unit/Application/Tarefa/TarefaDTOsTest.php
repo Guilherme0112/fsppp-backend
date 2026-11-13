@@ -22,7 +22,7 @@ class TarefaDTOsTest extends TestCase
             'data_fim' => '2026-04-02T18:00:00+00:00',
         ];
 
-        $dto = CriarTarefaDTO::daRequisicao($dados, 10);
+        $dto = CriarTarefaDTO::deArray($dados, 10);
 
         $this->assertSame('Criar Dockerfile', $dto->nome);
         $this->assertSame(1, $dto->statusId);
@@ -50,7 +50,7 @@ class TarefaDTOsTest extends TestCase
             'quadro_id' => 2,
         ];
 
-        $dto = CriarTarefaDTO::daRequisicao($dados, 10);
+        $dto = CriarTarefaDTO::deArray($dados, 10);
 
         $this->assertNull($dto->descricao);
         $this->assertNull($dto->dataInicio);
@@ -73,7 +73,7 @@ class TarefaDTOsTest extends TestCase
             'data_fim' => '2026-05-02',
         ];
 
-        $dto = AtualizarTarefaDTO::daRequisicao($dados, 15, 10);
+        $dto = AtualizarTarefaDTO::deArray($dados, 15, 10);
 
         $this->assertSame(15, $dto->id);
         $this->assertSame('Tarefa Atualizada', $dto->nome);
@@ -91,7 +91,7 @@ class TarefaDTOsTest extends TestCase
 
     public function test_listar_tarefas_dto_da_requisicao(): void
     {
-        $dto = ListarTarefasDTO::daRequisicao(['quadro_id' => 5], 99);
+        $dto = ListarTarefasDTO::deArray(['quadro_id' => 5], 99);
 
         $this->assertSame(99, $dto->usuarioId);
         $this->assertSame(5, $dto->quadroId);
@@ -99,7 +99,7 @@ class TarefaDTOsTest extends TestCase
 
     public function test_listar_tarefas_por_status_dto_da_requisicao_assume_pagina_1_por_padrao(): void
     {
-        $dto = ListarTarefasPorStatusDTO::daRequisicao([], 7, 99);
+        $dto = ListarTarefasPorStatusDTO::deArray([], 7, 99);
 
         $this->assertSame(99, $dto->usuarioId);
         $this->assertSame(7, $dto->statusId);
@@ -108,7 +108,7 @@ class TarefaDTOsTest extends TestCase
 
     public function test_listar_tarefas_por_status_dto_da_requisicao_com_pagina_explicita(): void
     {
-        $dto = ListarTarefasPorStatusDTO::daRequisicao(['page' => 3], 7, 99);
+        $dto = ListarTarefasPorStatusDTO::deArray(['page' => 3], 7, 99);
 
         $this->assertSame(3, $dto->pagina);
     }

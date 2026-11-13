@@ -73,6 +73,24 @@ class UsuarioEloquentRepositoryTest extends TestCase
         $this->assertEmpty($dados);
     }
 
+    public function test_listar_filtra_por_nome_ou_email(): void
+    {
+        UsuarioModelo::query()->create(['nome' => 'Ana Souza', 'email' => 'ana@example.com', 'senha' => '1234']);
+        UsuarioModelo::query()->create(['nome' => 'Bruno Lima', 'email' => 'bruno@example.com', 'senha' => '1234']);
+
+        $porNome = $this->repository->listar(1, 20, 'ana');
+        $dadosPorNome = $porNome['data'] ?? $porNome;
+
+        $this->assertCount(1, $dadosPorNome);
+        $this->assertSame('Ana Souza', $dadosPorNome[0]->nome());
+
+        $porEmail = $this->repository->listar(1, 20, 'bruno@');
+        $dadosPorEmail = $porEmail['data'] ?? $porEmail;
+
+        $this->assertCount(1, $dadosPorEmail);
+        $this->assertSame('bruno@example.com', $dadosPorEmail[0]->email());
+    }
+
     // ─── atualizar ────────────────────────────────────────────────────────────
 
     public function test_atualizar_modifica_dados_no_banco_e_retorna_entidade_atualizada(): void

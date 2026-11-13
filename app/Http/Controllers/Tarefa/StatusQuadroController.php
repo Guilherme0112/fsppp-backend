@@ -93,7 +93,7 @@ class StatusQuadroController extends Controller
         CriarStatusQuadroUseCase $casoDeUso,
     ): JsonResponse {
         return response()->json($casoDeUso->executar(
-            CriarStatusQuadroDTO::daRequisicao($requisicao->validated(), $quadroId, $requisicao->usuarioId()),
+            CriarStatusQuadroDTO::deArray($requisicao->validated(), $quadroId, $requisicao->usuarioId()),
         ), 201);
     }
 
@@ -140,7 +140,7 @@ class StatusQuadroController extends Controller
         AtualizarStatusQuadroUseCase $casoDeUso,
     ): JsonResponse {
         return response()->json($casoDeUso->executar(
-            AtualizarStatusQuadroDTO::daRequisicao(
+            AtualizarStatusQuadroDTO::deArray(
                 $requisicao->validated(),
                 $quadroId,
                 $id,

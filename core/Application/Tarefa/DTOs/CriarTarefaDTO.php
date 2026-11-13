@@ -17,7 +17,7 @@ readonly class CriarTarefaDTO
         public ?DateTimeImmutable $dataFim = null,
     ) {}
 
-    public static function daRequisicao(array $dados, int $usuarioId): self
+    public static function deArray(array $dados, int $usuarioId): self
     {
         return new self(
             nome: $dados['nome'],

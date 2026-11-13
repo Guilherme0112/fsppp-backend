@@ -13,7 +13,7 @@ readonly class AtualizarQuadroDTO
         public ?string $descricao = null,
     ) {}
 
-    public static function daRequisicao(array $dados, int $id, int $usuarioId): self
+    public static function deArray(array $dados, int $id, int $usuarioId): self
     {
         return new self($id, $dados['nome'], $usuarioId, $dados['descricao'] ?? null);
     }

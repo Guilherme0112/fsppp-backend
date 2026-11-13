@@ -1,9 +1,9 @@
 <?php
 
 use App\Http\Middleware\ForcarRespostaJson;
-use Core\Domain\SolicitacaoPagamento\Exceptions\SolicitacaoNaoEditavelException;
-use Core\Domain\SolicitacaoPagamento\Exceptions\SolicitacaoNaoEncontradaException;
-use Core\Domain\SolicitacaoPagamento\Exceptions\TransicaoStatusInvalidaException;
+use Core\Domain\SolicitacaoCompra\Exceptions\SolicitacaoNaoEditavelException;
+use Core\Domain\SolicitacaoCompra\Exceptions\SolicitacaoNaoEncontradaException;
+use Core\Domain\SolicitacaoCompra\Exceptions\TransicaoStatusInvalidaException;
 use Core\Domain\Tarefa\Exceptions\RecursoNaoEncontradoException;
 use Core\Domain\Usuario\Exceptions\CredenciaisInvalidasException;
 use Illuminate\Auth\AuthenticationException;

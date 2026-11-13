@@ -17,4 +17,6 @@ interface QuadroRepository
     public function pertenceAoUsuario(int $id, int $usuarioId): bool;
 
     public function convidarUmUsuario(int $quadroId, int $usuarioId): void;
+
+    public function listarUsuariosParaCompartilhamento(int $pagina = 1, int $porPagina = 10, ?string $busca = null): array;
 }

@@ -26,6 +26,7 @@ class UsuarioController extends Controller
         parameters: [
             new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 1)),
             new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 20)),
+            new OA\Parameter(name: 'search', in: 'query', required: false, description: 'Busca por nome ou e-mail', schema: new OA\Schema(type: 'string')),
         ],
         responses: [
             new OA\Response(
@@ -61,7 +62,7 @@ class UsuarioController extends Controller
         ListarUsuariosUseCase $casoDeUso,
     ): JsonResponse {
         return response()->json($casoDeUso->executar(
-            ListarUsuariosDTO::daRequisicao($requisicao->validated(), $requisicao->usuarioId()),
+            ListarUsuariosDTO::deArray($requisicao->validated(), $requisicao->usuarioId()),
         ));
     }
 
@@ -103,7 +104,7 @@ class UsuarioController extends Controller
         CriarUsuarioUseCase $casoDeUso,
     ): JsonResponse {
         return response()->json($casoDeUso->executar(
-            CriarUsuarioDTO::daRequisicao($requisicao->validated()),
+            CriarUsuarioDTO::deArray($requisicao->validated()),
         ), 201);
     }
 
@@ -150,7 +151,7 @@ class UsuarioController extends Controller
         AtualizarUsuarioUseCase $casoDeUso,
     ): JsonResponse {
         return response()->json($casoDeUso->executar(
-            AtualizarUsuarioDTO::daRequisicao($requisicao->validated(), $id),
+            AtualizarUsuarioDTO::deArray($requisicao->validated(), $id),
         ));
     }
 

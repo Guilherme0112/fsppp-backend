@@ -20,6 +20,12 @@ Route::prefix('/tarefas')->group(function () {
 
     Route::delete('/{id}', [TarefaController::class, 'apagarTarefa'])
         ->middleware('permission:tarefas.deletar');
+
+    Route::post('/{id}/compartilhar', [TarefaController::class, 'compartilharTarefa'])
+        ->middleware('permission:tarefas.editar');
+
+    Route::get('/{id}/usuarios-compartilhados', [TarefaController::class, 'listarUsuariosCompartilhadosTarefa'])
+        ->middleware('permission:tarefas.listar');
 });
 
 Route::prefix('/status-quadro')->group(function () {
@@ -40,6 +46,9 @@ Route::prefix('/quadros')->group(function () {
     Route::get('/', [QuadroController::class, 'listarQuadros'])
         ->middleware('permission:quadros.listar');
 
+    Route::get('/usuarios-compartilhamento', [QuadroController::class, 'listarUsuariosCompartilhamento'])
+        ->middleware('permission:quadros.listar');
+
     Route::post('/', [QuadroController::class, 'criarQuadro'])
         ->middleware('permission:quadros.criar');
 
@@ -48,4 +57,10 @@ Route::prefix('/quadros')->group(function () {
 
     Route::delete('/{id}', [QuadroController::class, 'apagarQuadro'])
         ->middleware('permission:quadros.deletar');
+
+    Route::post('/{id}/compartilhar', [QuadroController::class, 'compartilharQuadro'])
+        ->middleware('permission:quadros.editar');
+
+    Route::get('/{id}/usuarios-compartilhados', [QuadroController::class, 'listarUsuariosCompartilhadosQuadro'])
+        ->middleware('permission:quadros.listar');
 });

@@ -20,7 +20,7 @@ class UsuarioDTOsTest extends TestCase
             'senha' => 'segredo123',
         ];
 
-        $dto = CriarUsuarioDTO::daRequisicao($dados);
+        $dto = CriarUsuarioDTO::deArray($dados);
 
         $this->assertSame('João Silva', $dto->nome);
         $this->assertSame('joao@example.com', $dto->email);
@@ -50,7 +50,7 @@ class UsuarioDTOsTest extends TestCase
             'senha' => 'novaSenha',
         ];
 
-        $dto = AtualizarUsuarioDTO::daRequisicao($dados, 5);
+        $dto = AtualizarUsuarioDTO::deArray($dados, 5);
 
         $this->assertSame(5, $dto->id);
         $this->assertSame('João Atualizado', $dto->nome);
@@ -62,7 +62,7 @@ class UsuarioDTOsTest extends TestCase
     {
         $dados = ['nome' => 'Sem Senha', 'email' => 'semsenha@example.com'];
 
-        $dto = AtualizarUsuarioDTO::daRequisicao($dados, 3);
+        $dto = AtualizarUsuarioDTO::deArray($dados, 3);
 
         $this->assertSame(3, $dto->id);
         $this->assertNull($dto->senha, 'Senha deve ser null quando não enviada');
@@ -95,8 +95,22 @@ class UsuarioDTOsTest extends TestCase
 
     public function test_listar_usuarios_dto_da_requisicao_captura_usuario_id(): void
     {
-        $dto = ListarUsuariosDTO::daRequisicao([], 42);
+        $dto = ListarUsuariosDTO::deArray([], 42);
 
         $this->assertSame(42, $dto->usuarioId);
+    }
+
+    public function test_listar_usuarios_dto_captura_busca_normalizada(): void
+    {
+        $dto = ListarUsuariosDTO::deArray(['search' => '  joao  '], 42);
+
+        $this->assertSame('joao', $dto->busca);
+    }
+
+    public function test_listar_usuarios_dto_ignora_busca_vazia(): void
+    {
+        $dto = ListarUsuariosDTO::deArray(['search' => '   '], 42);
+
+        $this->assertNull($dto->busca);
     }
 }

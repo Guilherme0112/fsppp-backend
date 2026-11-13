@@ -21,4 +21,6 @@ interface TarefaRepository
     public function apagar(int $id): void;
 
     public function pertenceAoUsuario(int $id, int $usuarioId): bool;
+
+    public function convidarUmUsuario(int $tarefaId, int $usuarioId): void;
 }

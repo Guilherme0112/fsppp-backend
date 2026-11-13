@@ -10,7 +10,7 @@ readonly class ListarTarefasPorStatusDTO
         public int $pagina,
     ) {}
 
-    public static function daRequisicao(array $dados, int $statusId, int $usuarioId): self
+    public static function deArray(array $dados, int $statusId, int $usuarioId): self
     {
         return new self(
             usuarioId: $usuarioId,

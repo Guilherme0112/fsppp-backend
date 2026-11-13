@@ -15,7 +15,7 @@ readonly class AtualizarUsuarioDTO
         public array $papeis = [],
     ) {}
 
-    public static function daRequisicao(array $dados, int $id): self
+    public static function deArray(array $dados, int $id): self
     {
         return new self(
             id: $id,

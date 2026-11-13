@@ -52,7 +52,7 @@ class AutenticacaoController extends Controller
     public function entrar(EntrarRequisicao $requisicao, EntrarUseCase $casoDeUso): JsonResponse
     {
         return response()->json($casoDeUso->executar(
-            EntrarDTO::daRequisicao($requisicao->validated()),
+            EntrarDTO::deArray($requisicao->validated()),
         ));
     }
 

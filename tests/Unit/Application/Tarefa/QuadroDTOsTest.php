@@ -16,7 +16,7 @@ class QuadroDTOsTest extends TestCase
             'descricao' => 'Descrição opcional',
         ];
 
-        $dto = CriarQuadroDTO::daRequisicao($dados, 10);
+        $dto = CriarQuadroDTO::deArray($dados, 10);
 
         $this->assertSame('Novo Quadro', $dto->nome);
         $this->assertSame(10, $dto->usuarioId);
@@ -36,7 +36,7 @@ class QuadroDTOsTest extends TestCase
             'descricao' => null,
         ];
 
-        $dto = AtualizarQuadroDTO::daRequisicao($dados, 5, 10);
+        $dto = AtualizarQuadroDTO::deArray($dados, 5, 10);
 
         $this->assertSame(5, $dto->id);
         $this->assertSame('Quadro Modificado', $dto->nome);
@@ -52,7 +52,7 @@ class QuadroDTOsTest extends TestCase
 
     public function test_listar_quadros_dto_da_requisicao(): void
     {
-        $dto = ListarQuadrosDTO::daRequisicao([], 42);
+        $dto = ListarQuadrosDTO::deArray([], 42);
 
         $this->assertSame(42, $dto->usuarioId);
     }

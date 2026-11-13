@@ -9,17 +9,17 @@ readonly class CriarUsuarioDTO
     public function __construct(
         public string $nome,
         public string $email,
-        public string $senha,
+        public ?string $senha = null,
         /** @var list<string> */
         public array $papeis = [],
     ) {}
 
-    public static function daRequisicao(array $dados): self
+    public static function deArray(array $dados): self
     {
         return new self(
             nome: $dados['nome'],
             email: $dados['email'],
-            senha: $dados['senha'],
+            senha: $dados['senha'] ?? bin2hex(random_bytes(16)),
             papeis: $dados['papeis'] ?? [],
         );
     }
@@ -30,7 +30,7 @@ readonly class CriarUsuarioDTO
             id: null,
             nome: $this->nome,
             email: $this->email,
-            senha: $this->senha,
+            senha: $this->senha ?? '',
             papeis: $this->papeis,
         );
     }

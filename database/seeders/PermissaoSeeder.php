@@ -14,6 +14,9 @@ class PermissaoSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->renomearPapelLegado('Pagamentos', 'Compras');
+        $this->renomearPapelLegado('Aprovador Pagamentos', 'Aprovador Compras');
+
         $permissions = [
             'quadros.listar',
             'quadros.criar',
@@ -29,11 +32,6 @@ class PermissaoSeeder extends Seeder
             'usuario.criar',
             'usuario.editar',
             'usuario.deletar',
-
-            'pagamentos.listar',
-            'pagamentos.criar',
-            'pagamentos.editar',
-            'pagamentos.deletar',
 
             'solicitacoes.criar',
             'solicitacoes.ver-todas',
@@ -59,15 +57,11 @@ class PermissaoSeeder extends Seeder
                 'tarefas.deletar',
             ],
 
-            "Pagamentos" => [
-                'pagamentos.listar',
-                'pagamentos.criar',
-                'pagamentos.editar',
-                'pagamentos.deletar',
+            'Compras' => [
                 'solicitacoes.criar',
             ],
 
-            'Aprovador Pagamentos' => [
+            'Aprovador Compras' => [
                 'solicitacoes.ver-todas',
                 'solicitacoes.aprovar',
                 'solicitacoes.concluir',
@@ -86,6 +80,30 @@ class PermissaoSeeder extends Seeder
             $role->syncPermissions($rolePermissions);
         }
 
+        // The purchase flow used to be called "Pagamentos". Its permissions are
+        // no longer used, so remove them instead of leaving dead entries behind.
+        Permission::query()
+            ->whereIn('name', [
+                'pagamentos.listar',
+                'pagamentos.criar',
+                'pagamentos.editar',
+                'pagamentos.deletar',
+            ])
+            ->get()
+            ->each(fn (Permission $permission) => $permission->delete());
+
         app(PermissionRegistrar::class)->forgetCachedPermissions();
+    }
+
+    private function renomearPapelLegado(string $nomeAntigo, string $nomeNovo): void
+    {
+        $papelAntigo = Role::query()->where('name', $nomeAntigo)->first();
+        $papelNovo = Role::query()->where('name', $nomeNovo)->first();
+
+        if ($papelAntigo === null || $papelNovo !== null) {
+            return;
+        }
+
+        $papelAntigo->update(['name' => $nomeNovo]);
     }
 }

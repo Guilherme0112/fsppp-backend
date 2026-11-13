@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Domain\Telefone;
 
-use Core\Domain\Telefone\ValueObjects\Telefone;
+use Core\Domain\Shared\ValueObjects\Telefone;
 use PHPUnit\Framework\TestCase;
 
 class TelefoneTest extends TestCase

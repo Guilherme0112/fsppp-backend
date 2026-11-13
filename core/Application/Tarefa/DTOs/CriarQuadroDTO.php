@@ -12,7 +12,7 @@ readonly class CriarQuadroDTO
         public ?string $descricao = null,
     ) {}
 
-    public static function daRequisicao(array $dados, int $usuarioId): self
+    public static function deArray(array $dados, int $usuarioId): self
     {
         return new self($dados['nome'], $usuarioId, $dados['descricao'] ?? null);
     }

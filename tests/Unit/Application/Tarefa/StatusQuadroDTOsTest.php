@@ -15,7 +15,7 @@ class StatusQuadroDTOsTest extends TestCase
             'descricao' => 'Itens sob revisão',
         ];
 
-        $dto = CriarStatusQuadroDTO::daRequisicao($dados, 1, 10);
+        $dto = CriarStatusQuadroDTO::deArray($dados, 1, 10);
 
         $this->assertSame(1, $dto->quadroId);
         $this->assertSame(10, $dto->usuarioId);
@@ -36,7 +36,7 @@ class StatusQuadroDTOsTest extends TestCase
             'descricao' => null,
         ];
 
-        $dto = AtualizarStatusQuadroDTO::daRequisicao($dados, 2, 7, 10);
+        $dto = AtualizarStatusQuadroDTO::deArray($dados, 2, 7, 10);
 
         $this->assertSame(7, $dto->id);
         $this->assertSame(2, $dto->quadroId);

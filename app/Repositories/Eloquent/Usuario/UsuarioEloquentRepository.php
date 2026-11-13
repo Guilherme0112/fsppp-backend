@@ -12,10 +12,16 @@ class UsuarioEloquentRepository implements UsuarioRepository
 {
     public function __construct(private readonly UsuarioMapeador $mapeador) {}
 
-    public function listar(int $pagina = 1, int $porPagina = 20): array
+    public function listar(int $pagina = 1, int $porPagina = 20, ?string $busca = null): array
     {
         return UsuarioModelo::query()
             ->with('roles')
+            ->when($busca, function ($query, string $busca): void {
+                $query->where(function ($query) use ($busca): void {
+                    $query->whereLike('nome', "%{$busca}%")
+                        ->orWhereLike('email', "%{$busca}%");
+                });
+            })
             ->paginate($porPagina, ['*'], 'page', $pagina)
             ->through(fn (UsuarioModelo $modelo): Usuario => $this->mapeador->paraEntidade($modelo))
             ->toArray();

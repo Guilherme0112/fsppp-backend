@@ -5,6 +5,7 @@ namespace Tests\Feature\Tarefa;
 use App\Models\Tarefa\Quadro;
 use App\Models\Tarefa\StatusQuadro;
 use App\Models\Usuario;
+use Database\Seeders\PermissaoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -21,11 +22,13 @@ class StatusQuadroControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seed(PermissaoSeeder::class);
         $this->usuario = Usuario::query()->create([
             'nome' => 'Usuario Teste',
             'email' => 'usuario@example.com',
             'senha' => 'senha-correta',
         ]);
+        $this->usuario->assignRole('Admin');
         $this->token = $this->usuario->createToken('teste')->plainTextToken;
         $this->quadro = Quadro::query()->create([
             'nome' => 'Quadro Teste',

@@ -24,4 +24,17 @@ final class NumeroDocumento
 
         return strlen($this->numero) <= 11 ? 'cpf' : 'cnpj';
     }
+
+    public function formatado(): string
+    {
+        if ($this->numero === '') {
+            return '';
+        }
+
+        if (strlen($this->numero) === 14) {
+            return preg_replace('/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/', '$1.$2.$3/$4-$5', $this->numero);
+        }
+
+        return $this->numero;
+    }
 }

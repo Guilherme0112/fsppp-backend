@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Usuario;
+use Database\Seeders\PermissaoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
@@ -49,11 +50,14 @@ class AutenticacaoTest extends TestCase
 
     public function test_usuario_pode_entrar_acessar_rota_protegida_e_sair(): void
     {
-        Usuario::query()->create([
+        $this->seed(PermissaoSeeder::class);
+
+        $usuario = Usuario::query()->create([
             'nome' => 'Usuário Teste',
             'email' => 'usuario@example.com',
             'senha' => 'senha-correta',
         ]);
+        $usuario->assignRole('Admin');
 
         $resposta = $this->postJson('/api/v1/autenticacao/entrar', [
             'email' => 'usuario@example.com',

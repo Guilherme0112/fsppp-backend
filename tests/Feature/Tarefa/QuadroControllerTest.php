@@ -4,6 +4,7 @@ namespace Tests\Feature\Tarefa;
 
 use App\Models\Tarefa\Quadro;
 use App\Models\Usuario;
+use Database\Seeders\PermissaoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -18,11 +19,13 @@ class QuadroControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seed(PermissaoSeeder::class);
         $this->usuario = Usuario::query()->create([
             'nome' => 'Usuario Teste',
             'email' => 'usuario@example.com',
             'senha' => 'senha-correta',
         ]);
+        $this->usuario->assignRole('Admin');
         $this->token = $this->usuario->createToken('teste')->plainTextToken;
     }
 
@@ -211,5 +214,31 @@ class QuadroControllerTest extends TestCase
         $this->withToken($this->token)
             ->deleteJson("/api/v1/quadros/{$quadro->id}")
             ->assertNotFound();
+    }
+
+    public function test_compartilhar_quadro_com_sucesso(): void
+    {
+        $quadro = Quadro::query()->create([
+            'nome' => 'Meu Quadro',
+            'usuario_id' => $this->usuario->id,
+        ]);
+
+        $outroUsuario = Usuario::query()->create([
+            'nome' => 'Outro Usuario',
+            'email' => 'outro2@example.com',
+            'senha' => 'senha-correta',
+        ]);
+
+        $this->withToken($this->token)
+            ->postJson("/api/v1/quadros/{$quadro->id}/compartilhar", [
+                'usuario_id' => $outroUsuario->id,
+            ])
+            ->assertOk()
+            ->assertJson(['mensagem' => 'Quadro compartilhado com sucesso.']);
+
+        $this->assertDatabaseHas('quadro_usuario', [
+            'quadro_id' => $quadro->id,
+            'usuario_id' => $outroUsuario->id,
+        ]);
     }
 }

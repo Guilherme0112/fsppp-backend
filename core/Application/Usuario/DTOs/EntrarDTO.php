@@ -10,7 +10,7 @@ class EntrarDTO
         public string $nomeDispositivo,
     ) {}
 
-    public static function daRequisicao(array $dados): self
+    public static function deArray(array $dados): self
     {
         return new self(
             email: $dados['email'],

@@ -5,9 +5,12 @@ namespace App\Models\Tarefa;
 use App\Models\ModelBase;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class StatusQuadro extends ModelBase
 {
+    use SoftDeletes;
+
     protected $table = 'status_quadro';
 
     protected $fillable = [

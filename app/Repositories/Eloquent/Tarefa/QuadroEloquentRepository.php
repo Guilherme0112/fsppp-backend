@@ -16,6 +16,9 @@ class QuadroEloquentRepository implements QuadroRepository
     {
         return QuadroModelo::query()
             ->where('usuario_id', $usuarioId)
+            ->orWhereHas('usuarios', function ($query) use ($usuarioId) {
+                $query->where('usuarios.id', $usuarioId);
+            })
             ->paginate(20)
             ->through(fn (QuadroModelo $modelo): Quadro => $this->mapeador->paraEntidade($modelo))
             ->toArray();
@@ -50,14 +53,37 @@ class QuadroEloquentRepository implements QuadroRepository
 
     public function pertenceAoUsuario(int $id, int $usuarioId): bool
     {
-        return QuadroModelo::query()->whereKey($id)->where('usuario_id', $usuarioId)->exists();
+        return QuadroModelo::query()
+            ->whereKey($id)
+            ->where(function ($query) use ($usuarioId) {
+                $query->where('usuario_id', $usuarioId)
+                    ->orWhereHas('usuarios', function ($q) use ($usuarioId) {
+                        $q->where('usuarios.id', $usuarioId);
+                    });
+            })
+            ->exists();
     }
 
     public function convidarUmUsuario(int $id, int $usuarioId): void
     {
         DB::transaction(function () use ($id, $usuarioId) {
             $quadro = QuadroModelo::query()->findOrFail($id);
-            $quadro->usuarios()->attach($usuarioId);
+            $quadro->usuarios()->syncWithoutDetaching([$usuarioId]);
         });
+    }
+
+    public function listarUsuariosParaCompartilhamento(int $pagina = 1, int $porPagina = 10, ?string $busca = null): array
+    {
+        $query = \App\Models\Usuario::query();
+
+        if ($busca) {
+            $query->whereLike('nome', "%{$busca}%")
+                ->orWhereLike('email', "%{$busca}%");
+        }
+
+        return $query
+            ->select('id', 'nome', 'email')
+            ->paginate($porPagina, ['*'], 'page', $pagina)
+            ->toArray();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Domain\Documento;
 
-use Core\Domain\Documento\ValueObjects\NumeroDocumento;
+use Core\Domain\Shared\ValueObjects\NumeroDocumento;
 use PHPUnit\Framework\TestCase;
 
 class NumeroDocumentoTest extends TestCase

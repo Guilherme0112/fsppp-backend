@@ -28,7 +28,15 @@ class TarefaEloquentRepository implements TarefaRepository
     public function listarPorUsuarioId(int $usuarioId): array
     {
         return TarefaModelo::query()
-            ->whereHas('quadro', fn ($consulta) => $consulta->where('usuario_id', $usuarioId))
+            ->where(function ($query) use ($usuarioId) {
+                $query->whereHas('quadro', function ($q) use ($usuarioId) {
+                    $q->where('usuario_id', $usuarioId)
+                      ->orWhereHas('usuarios', fn($subQ) => $subQ->where('usuarios.id', $usuarioId));
+                })
+                ->orWhereHas('usuarios', function ($q) use ($usuarioId) {
+                    $q->where('usuarios.id', $usuarioId);
+                });
+            })
             ->paginate(20)
             ->through(fn (TarefaModelo $modelo): Tarefa => $this->mapeador->paraEntidade($modelo))
             ->toArray();
@@ -99,7 +107,23 @@ class TarefaEloquentRepository implements TarefaRepository
     public function pertenceAoUsuario(int $id, int $usuarioId): bool
     {
         return TarefaModelo::query()->whereKey($id)
-            ->whereHas('quadro', fn ($consulta) => $consulta->where('usuario_id', $usuarioId))
+            ->where(function ($query) use ($usuarioId) {
+                $query->whereHas('quadro', function ($q) use ($usuarioId) {
+                    $q->where('usuario_id', $usuarioId)
+                      ->orWhereHas('usuarios', fn($subQ) => $subQ->where('usuarios.id', $usuarioId));
+                })
+                ->orWhereHas('usuarios', function ($q) use ($usuarioId) {
+                    $q->where('usuarios.id', $usuarioId);
+                });
+            })
             ->exists();
+    }
+
+    public function convidarUmUsuario(int $id, int $usuarioId): void
+    {
+        \DB::transaction(function () use ($id, $usuarioId) {
+            $tarefa = TarefaModelo::query()->findOrFail($id);
+            $tarefa->usuarios()->syncWithoutDetaching([$usuarioId]);
+        });
     }
 }

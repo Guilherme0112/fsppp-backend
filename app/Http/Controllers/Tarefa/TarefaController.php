@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Tarefa;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requisicoes\Tarefa\ConvidarUsuarioTarefaRequisicao;
 use App\Http\Requisicoes\Tarefa\ListarTarefasPorStatusRequisicao;
 use App\Http\Requisicoes\Tarefa\ListarTarefasRequisicao;
 use App\Http\Requisicoes\Tarefa\SalvarTarefaRequisicao;
@@ -13,6 +14,7 @@ use Core\Application\Tarefa\DTOs\ListarTarefasDTO;
 use Core\Application\Tarefa\DTOs\ListarTarefasPorStatusDTO;
 use Core\Application\Tarefa\UseCases\ApagarTarefaUseCase;
 use Core\Application\Tarefa\UseCases\AtualizarTarefaUseCase;
+use Core\Application\Tarefa\UseCases\ConvidarUsuarioTarefaUseCase;
 use Core\Application\Tarefa\UseCases\CriarTarefaUseCase;
 use Core\Application\Tarefa\UseCases\ListarTarefasPorStatusUseCase;
 use Core\Application\Tarefa\UseCases\ListarTarefasUseCase;
@@ -86,7 +88,7 @@ class TarefaController extends Controller
         ListarTarefasUseCase $casoDeUso,
     ): JsonResponse {
         return response()->json($casoDeUso->executar(
-            ListarTarefasDTO::daRequisicao($requisicao->validated(), $requisicao->usuarioId()),
+            ListarTarefasDTO::deArray($requisicao->validated(), $requisicao->usuarioId()),
         ));
     }
 
@@ -137,7 +139,7 @@ class TarefaController extends Controller
         ListarTarefasPorStatusUseCase $casoDeUso,
     ): JsonResponse {
         return response()->json($casoDeUso->executar(
-            ListarTarefasPorStatusDTO::daRequisicao($requisicao->validated(), $statusId, $requisicao->usuarioId()),
+            ListarTarefasPorStatusDTO::deArray($requisicao->validated(), $statusId, $requisicao->usuarioId()),
         ));
     }
 
@@ -184,7 +186,7 @@ class TarefaController extends Controller
         CriarTarefaUseCase $casoDeUso,
     ): JsonResponse {
         return response()->json($casoDeUso->executar(
-            CriarTarefaDTO::daRequisicao($requisicao->validated(), $requisicao->usuarioId()),
+            CriarTarefaDTO::deArray($requisicao->validated(), $requisicao->usuarioId()),
         ), 201);
     }
 
@@ -236,7 +238,7 @@ class TarefaController extends Controller
         AtualizarTarefaUseCase $casoDeUso,
     ): JsonResponse {
         return response()->json($casoDeUso->executar(
-            AtualizarTarefaDTO::daRequisicao($requisicao->validated(), $id, $requisicao->usuarioId()),
+            AtualizarTarefaDTO::deArray($requisicao->validated(), $id, $requisicao->usuarioId()),
         ));
     }
 
@@ -261,5 +263,75 @@ class TarefaController extends Controller
     ): JsonResponse {
         $casoDeUso->executar($id, $requisicao->usuarioId());
         return response()->json(null, 204);
+    }
+
+    #[OA\Post(
+        path: "/tarefas/{id}/compartilhar",
+        summary: "Compartilhar cartão/tarefa com usuário",
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: "usuario_id", type: "integer", example: 2),
+                ]
+            )
+        ),
+        tags: ["Tarefas"],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Cartão compartilhado com sucesso"),
+            new OA\Response(response: 401, description: "Não autenticado"),
+            new OA\Response(response: 404, description: "Cartão não encontrado"),
+            new OA\Response(response: 422, description: "Erro de validação")
+        ]
+    )]
+    public function compartilharTarefa(
+        ConvidarUsuarioTarefaRequisicao $requisicao,
+        int $id,
+        ConvidarUsuarioTarefaUseCase $casoDeUso,
+    ): JsonResponse {
+        $casoDeUso->executar($id, (int) $requisicao->input('usuario_id'), $requisicao->usuarioId());
+
+        return response()->json(['mensagem' => 'Cartão compartilhado com sucesso.'], 200);
+    }
+
+    public function listarUsuariosCompartilhadosTarefa(
+        UsuarioAutenticadoRequisicao $requisicao,
+        int $id,
+    ): JsonResponse {
+        $tarefa = \App\Models\Tarefa\Tarefa::query()->with(['quadro.dono:id,nome,email', 'quadro.usuarios:id,nome,email', 'usuarios:id,nome,email'])->findOrFail($id);
+        
+        $usuarios = collect();
+        if ($tarefa->quadro && $tarefa->quadro->dono) {
+            $usuarios->push([
+                'id' => $tarefa->quadro->dono->id,
+                'nome' => $tarefa->quadro->dono->nome,
+                'email' => $tarefa->quadro->dono->email,
+                'tipo' => 'Dono do Quadro',
+            ]);
+        }
+        if ($tarefa->quadro) {
+            foreach ($tarefa->quadro->usuarios as $u) {
+                $usuarios->push([
+                    'id' => $u->id,
+                    'nome' => $u->nome,
+                    'email' => $u->email,
+                    'tipo' => 'Quadro Compartilhado',
+                ]);
+            }
+        }
+        foreach ($tarefa->usuarios as $u) {
+            $usuarios->push([
+                'id' => $u->id,
+                'nome' => $u->nome,
+                'email' => $u->email,
+                'tipo' => 'Cartão Compartilhado',
+            ]);
+        }
+
+        return response()->json($usuarios->unique('id')->values());
     }
 }

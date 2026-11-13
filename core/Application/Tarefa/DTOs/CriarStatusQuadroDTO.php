@@ -8,7 +8,7 @@ readonly class CriarStatusQuadroDTO
 {
     public function __construct(public int $quadroId, public int $usuarioId, public string $nome, public ?string $descricao = null) {}
 
-    public static function daRequisicao(array $dados, int $quadroId, int $usuarioId): self
+    public static function deArray(array $dados, int $quadroId, int $usuarioId): self
     {
         return new self($quadroId, $usuarioId, $dados['nome'], $dados['descricao'] ?? null);
     }

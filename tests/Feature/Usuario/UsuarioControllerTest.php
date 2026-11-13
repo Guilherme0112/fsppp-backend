@@ -18,11 +18,13 @@ class UsuarioControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seed(PermissaoSeeder::class);
         $this->usuario = Usuario::query()->create([
             'nome'  => 'Admin Teste',
             'email' => 'admin@example.com',
             'senha' => 'senha-correta',
         ]);
+        $this->usuario->assignRole('Admin');
         $this->token = $this->usuario->createToken('teste')->plainTextToken;
     }
 
@@ -73,6 +75,24 @@ class UsuarioControllerTest extends TestCase
                 '*' => ['id', 'nome', 'email'],
             ],
         ]);
+    }
+
+    public function test_listar_usuarios_filtra_por_nome_ou_email(): void
+    {
+        Usuario::query()->create(['nome' => 'Ana Souza', 'email' => 'ana@example.com', 'senha' => 'abc']);
+        Usuario::query()->create(['nome' => 'Bruno Lima', 'email' => 'bruno@example.com', 'senha' => 'abc']);
+
+        $this->withToken($this->token)
+            ->getJson('/api/v1/usuarios?search=ana')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.nome', 'Ana Souza');
+
+        $this->withToken($this->token)
+            ->getJson('/api/v1/usuarios?search=bruno@')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.email', 'bruno@example.com');
     }
 
     // ─── Criar ────────────────────────────────────────────────────────────────
@@ -266,7 +286,7 @@ class UsuarioControllerTest extends TestCase
         $resposta = $this->withToken($this->token)->getJson('/api/v1/papeis')->assertOk();
 
         $this->assertEqualsCanonicalizing(
-            ['Admin', 'Quadros e Tarefas', 'Pagamentos', 'Aprovador Pagamentos', 'Usuários'],
+            ['Admin', 'Quadros e Tarefas', 'Compras', 'Aprovador Compras', 'Usuários'],
             $resposta->json(),
         );
     }
@@ -280,15 +300,15 @@ class UsuarioControllerTest extends TestCase
                 'nome' => 'Com Papeis',
                 'email' => 'compapeis@example.com',
                 'senha' => 'senha123',
-                'papeis' => ['Pagamentos', 'Aprovador Pagamentos'],
+                'papeis' => ['Compras', 'Aprovador Compras'],
             ])
             ->assertCreated();
 
-        $this->assertEqualsCanonicalizing(['Pagamentos', 'Aprovador Pagamentos'], $resposta->json('papeis'));
+        $this->assertEqualsCanonicalizing(['Compras', 'Aprovador Compras'], $resposta->json('papeis'));
 
         $criado = Usuario::query()->where('email', 'compapeis@example.com')->first();
-        $this->assertTrue($criado->hasRole('Pagamentos'));
-        $this->assertTrue($criado->hasRole('Aprovador Pagamentos'));
+        $this->assertTrue($criado->hasRole('Compras'));
+        $this->assertTrue($criado->hasRole('Aprovador Compras'));
     }
 
     public function test_criar_usuario_com_papel_invalido_retorna_422(): void
@@ -310,20 +330,20 @@ class UsuarioControllerTest extends TestCase
         $this->seed(PermissaoSeeder::class);
 
         $alvo = Usuario::query()->create(['nome' => 'Alvo', 'email' => 'alvo@example.com', 'senha' => 'senha']);
-        $alvo->assignRole('Pagamentos');
+        $alvo->assignRole('Compras');
 
         $resposta = $this->withToken($this->token)
             ->putJson("/api/v1/usuarios/{$alvo->id}", [
                 'nome' => 'Alvo',
                 'email' => 'alvo@example.com',
-                'papeis' => ['Admin', 'Aprovador Pagamentos'],
+                'papeis' => ['Admin', 'Aprovador Compras'],
             ])
             ->assertOk();
 
-        $this->assertEqualsCanonicalizing(['Admin', 'Aprovador Pagamentos'], $resposta->json('papeis'));
+        $this->assertEqualsCanonicalizing(['Admin', 'Aprovador Compras'], $resposta->json('papeis'));
         $this->assertTrue($alvo->fresh()->hasRole('Admin'));
-        $this->assertTrue($alvo->fresh()->hasRole('Aprovador Pagamentos'));
-        $this->assertFalse($alvo->fresh()->hasRole('Pagamentos'));
+        $this->assertTrue($alvo->fresh()->hasRole('Aprovador Compras'));
+        $this->assertFalse($alvo->fresh()->hasRole('Compras'));
     }
 
     public function test_atualizar_usuario_sem_papeis_remove_todos_os_papeis_atuais(): void
@@ -331,7 +351,7 @@ class UsuarioControllerTest extends TestCase
         $this->seed(PermissaoSeeder::class);
 
         $alvo = Usuario::query()->create(['nome' => 'Alvo', 'email' => 'alvo2@example.com', 'senha' => 'senha']);
-        $alvo->assignRole('Pagamentos');
+        $alvo->assignRole('Compras');
 
         $this->withToken($this->token)
             ->putJson("/api/v1/usuarios/{$alvo->id}", [
@@ -347,11 +367,11 @@ class UsuarioControllerTest extends TestCase
     public function test_listar_usuarios_retorna_os_papeis_atuais(): void
     {
         $this->seed(PermissaoSeeder::class);
-        $this->usuario->assignRole(['Admin', 'Aprovador Pagamentos']);
+        $this->usuario->assignRole(['Admin', 'Aprovador Compras']);
 
         $resposta = $this->withToken($this->token)->getJson('/api/v1/usuarios')->assertOk();
 
         $usuarioNaLista = collect($resposta->json('data'))->firstWhere('id', $this->usuario->id);
-        $this->assertEqualsCanonicalizing(['Admin', 'Aprovador Pagamentos'], $usuarioNaLista['papeis']);
+        $this->assertEqualsCanonicalizing(['Admin', 'Aprovador Compras'], $usuarioNaLista['papeis']);
     }
 }

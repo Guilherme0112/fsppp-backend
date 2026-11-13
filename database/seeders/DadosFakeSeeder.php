@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\SolicitacaoPagamento\SolicitacaoPagamento;
+use App\Models\SolicitacaoCompra\SolicitacaoCompra;
 use App\Models\Tarefa\Quadro;
 use App\Models\Tarefa\StatusQuadro;
 use App\Models\Tarefa\Tarefa;
@@ -13,7 +13,7 @@ class DadosFakeSeeder extends Seeder
 {
     public function run(): void
     {
-        $papeis = ['Quadros e Tarefas', 'Pagamentos', 'Aprovador Pagamentos', 'Usuários'];
+        $papeis = ['Quadros e Tarefas', 'Compras', 'Aprovador Compras', 'Usuários'];
 
         $usuarios = Usuario::factory()
             ->count(8)
@@ -51,33 +51,64 @@ class DadosFakeSeeder extends Seeder
         }
 
         $statusDistribuicao = [
-            SolicitacaoPagamento::STATUS_PENDENTE,
-            SolicitacaoPagamento::STATUS_PENDENTE,
-            SolicitacaoPagamento::STATUS_APROVADO,
-            SolicitacaoPagamento::STATUS_CONCLUIDO,
-            SolicitacaoPagamento::STATUS_CANCELADO,
+            SolicitacaoCompra::STATUS_PENDENTE,
+            SolicitacaoCompra::STATUS_ENVIADO_DIRETORIA,
+            SolicitacaoCompra::STATUS_APROVADO_DIRETORIA,
+            SolicitacaoCompra::STATUS_REJEITADO_DIRETORIA,
+            SolicitacaoCompra::STATUS_ANALISE_PROJETOS,
+            SolicitacaoCompra::STATUS_RECURSOS_DISPONIVEIS_COMPRAS,
+            SolicitacaoCompra::STATUS_RECURSOS_FUNDACAO,
+            SolicitacaoCompra::STATUS_CONCLUIDO,
+            SolicitacaoCompra::STATUS_CANCELADO,
         ];
 
-        foreach (range(1, 20) as $__) {
+        foreach (range(1, 25) as $__) {
             $status = fake()->randomElement($statusDistribuicao);
             $solicitante = $usuarios->random();
             $analista = $usuarios->except([$solicitante->id])->random();
+            $recursosExistem = in_array($status, [
+                SolicitacaoCompra::STATUS_RECURSOS_DISPONIVEIS_COMPRAS,
+                SolicitacaoCompra::STATUS_RECURSOS_FUNDACAO,
+                SolicitacaoCompra::STATUS_CONCLUIDO,
+            ]) ? fake()->boolean(70) : null;
 
-            SolicitacaoPagamento::create([
+            SolicitacaoCompra::create([
                 'titulo' => fake()->randomElement([
-                    'Reembolso de viagem', 'Compra de material de escritório', 'Pagamento de fornecedor',
+                    'Reembolso de viagem', 'Compra de material de escritório', 'Contratação de fornecedor',
                     'Assinatura de software', 'Manutenção de equipamento', 'Hospedagem de evento',
                 ]),
                 'valor' => fake()->numberBetween(1000, 500000),
                 'descricao' => fake()->boolean(70) ? '<p>'.fake()->paragraph().'</p>' : null,
                 'usuario_id' => $solicitante->id,
                 'status' => $status,
-                'aprovado_cancelado_por' => in_array($status, [
-                    SolicitacaoPagamento::STATUS_APROVADO,
-                    SolicitacaoPagamento::STATUS_CONCLUIDO,
-                    SolicitacaoPagamento::STATUS_CANCELADO,
+                'prioridade' => fake()->randomElement(['baixa', 'media', 'alta', 'urgente']),
+                'motivo_rejeicao' => $status === SolicitacaoCompra::STATUS_REJEITADO_DIRETORIA
+                    ? 'Orçamento incompatível com as diretrizes vigentes ou documentação incompleta.'
+                    : null,
+                'recursos_existem' => $recursosExistem,
+                'status_compra' => in_array($status, [
+                    SolicitacaoCompra::STATUS_RECURSOS_DISPONIVEIS_COMPRAS,
+                    SolicitacaoCompra::STATUS_RECURSOS_FUNDACAO,
+                    SolicitacaoCompra::STATUS_CONCLUIDO,
+                ]) ? fake()->randomElement(['Aguardando cotação', 'Comprado', 'Em trânsito', 'Entregue']) : null,
+                'diretoria_por' => in_array($status, [
+                    SolicitacaoCompra::STATUS_APROVADO_DIRETORIA,
+                    SolicitacaoCompra::STATUS_REJEITADO_DIRETORIA,
+                    SolicitacaoCompra::STATUS_ANALISE_PROJETOS,
+                    SolicitacaoCompra::STATUS_RECURSOS_DISPONIVEIS_COMPRAS,
+                    SolicitacaoCompra::STATUS_RECURSOS_FUNDACAO,
+                    SolicitacaoCompra::STATUS_CONCLUIDO,
                 ]) ? $analista->id : null,
-                'concluido_por' => $status === SolicitacaoPagamento::STATUS_CONCLUIDO ? $analista->id : null,
+                'projetos_por' => in_array($status, [
+                    SolicitacaoCompra::STATUS_RECURSOS_DISPONIVEIS_COMPRAS,
+                    SolicitacaoCompra::STATUS_RECURSOS_FUNDACAO,
+                    SolicitacaoCompra::STATUS_CONCLUIDO,
+                ]) ? $analista->id : null,
+                'compras_por' => in_array($status, [
+                    SolicitacaoCompra::STATUS_RECURSOS_DISPONIVEIS_COMPRAS,
+                    SolicitacaoCompra::STATUS_CONCLUIDO,
+                ]) ? $analista->id : null,
+                'concluido_por' => $status === SolicitacaoCompra::STATUS_CONCLUIDO ? $analista->id : null,
             ]);
         }
     }
