@@ -1,0 +1,37 @@
+.git
+.gitignore
+.idea
+.vscode
+
+# Saídas e dependências geradas localmente
+node_modules
+vendor
+public/build
+public/hot
+public/storage
+
+# Segredos e artefatos locais — nunca entram na imagem
+.env
+.env.*
+storage/logs/*.log
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+database/database.sqlite
+
+# Scripts soltos de debug do dev (podem conter credenciais)
+check_env.php
+enable_pdo_sqlite.php
+fix_env.php
+set_db_name.php
+set_pgsql.php
+test_db.php
+
+# Não necessário em produção
+tests
+.phpunit.result.cache
+phpunit.xml
+GEMINI.md
+README.md
+Dockerfile
+.dockerignore

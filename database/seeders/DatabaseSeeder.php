@@ -27,5 +27,6 @@ class DatabaseSeeder extends Seeder
         $usuario->syncRoles(['Admin']);
 
         $this->call(DadosFakeSeeder::class);
+        $this->call(DadosVolumososSeeder::class);
     }
 }
