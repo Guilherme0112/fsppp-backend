@@ -6,7 +6,8 @@
 # Build:
 #   docker build -t fsppp-backend ./fsppp-backend
 #
-# Run (o PaaS injeta PORT; localmente cai para 8080):
+# O Apache escuta na porta fixa 8080; na Railway, aponte o Target Port do
+# domínio para 8080. Rode localmente:
 #   docker run --rm -p 8080:8080 \
 #     -e APP_KEY=base64:... \
 #     -e DB_CONNECTION=pgsql -e DB_HOST=... -e DB_PORT=5432 \
@@ -59,8 +60,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 ENV APP_ENV=production \
     APP_DEBUG=false \
     LOG_CHANNEL=stderr \
-    LOG_LEVEL=info \
-    PORT=8080
+    LOG_LEVEL=info
 
 WORKDIR /var/www/html
 
@@ -78,12 +78,11 @@ RUN composer dump-autoload --optimize --no-dev \
 
 COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
-# Render/Railway injetam PORT; Apache é reconfigurado no entrypoint.
-# Fly.io usa 8080 por padrão (coincide com o default).
+# A Railway roteia o domínio para o Target Port configurado (mantenha 8080).
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-    CMD curl -fsS "http://127.0.0.1:${PORT}/up" || exit 1
+    CMD curl -fsS "http://127.0.0.1:8080/up" || exit 1
 
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["apache2-foreground"]

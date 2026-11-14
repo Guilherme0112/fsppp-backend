@@ -1,11 +1,10 @@
 #!/bin/sh
 set -e
 
-PORT="${PORT:-8080}"
-
-# Aponta o Apache para a porta fornecida pelo PaaS
-sed -ri "s/^Listen .*/Listen ${PORT}/" /etc/apache2/ports.conf
-sed -ri "s/<VirtualHost \*:[0-9]+>/<VirtualHost *:${PORT}>/" /etc/apache2/sites-available/000-default.conf
+# Porta fixa 8080 (a Railway roteia o domínio para o Target Port configurado —
+# mantenha o Target Port como 8080 no painel).
+sed -ri "s/^Listen .*/Listen 8080/" /etc/apache2/ports.conf
+sed -ri "s/<VirtualHost \*:[0-9]+>/<VirtualHost *:8080>/" /etc/apache2/sites-available/000-default.conf
 
 # Cache de configuração/rotas/views com as envs do ambiente atual
 php artisan config:cache
