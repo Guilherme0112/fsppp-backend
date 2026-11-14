@@ -36,10 +36,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         intl \
         zip \
         opcache \
-    && a2enmod rewrite \
-    && echo "ServerName localhost" >> /etc/apache2/apache2.conf \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Garante um único MPM: a imagem base do Apache habilita mpm_event e a imagem
+# PHP habilita mpm_prefork — manter os dois derruba o Apache na subida
+# (AH00534: More than one MPM loaded).
+RUN a2dismod mpm_event mpm_worker 2>/dev/null || true \
+    && a2enmod mpm_prefork rewrite \
+    && echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Apache: servir o Laravel a partir de /public com .htaccess habilitado
 RUN sed -ri "s!/var/www/html!/var/www/html/public!g" /etc/apache2/sites-available/000-default.conf
